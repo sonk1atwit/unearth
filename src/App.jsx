@@ -7,7 +7,7 @@ export default function App() {
   const [scanResults, setScanResults] = useState(null)
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-stone-50 text-stone-800">
       <Navbar />
       <main className="max-w-4xl mx-auto px-4 py-10">
         <ScanForm onResults={setScanResults} />

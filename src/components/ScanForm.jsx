@@ -27,8 +27,8 @@ export default function ScanForm({ onResults }) {
 
   return (
     <div className="mb-10">
-      <h1 className="text-3xl font-bold mb-2">Find your digital footprint</h1>
-      <p className="text-gray-400 mb-6 text-sm">
+      <h1 className="text-3xl font-bold mb-2 text-stone-800">Find your digital footprint</h1>
+      <p className="text-stone-500 mb-6 text-sm">
         Enter your details below to scan public data sources for your personal information.
       </p>
       <form onSubmit={handleScan} className="flex flex-col sm:flex-row gap-3">
@@ -37,19 +37,20 @@ export default function ScanForm({ onResults }) {
           placeholder="Full name"
           value={name}
           onChange={e => setName(e.target.value)}
-          className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-emerald-500"
+          className="flex-1 bg-white border border-stone-300 rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-500"
         />
         <input
           type="email"
           placeholder="Email (optional)"
           value={email}
           onChange={e => setEmail(e.target.value)}
-          className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-emerald-500"
+          className="flex-1 bg-white border border-stone-300 rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-500"
         />
         <button
           type="submit"
           disabled={loading}
-          className="bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50 text-gray-950 font-semibold px-6 py-2 rounded-lg text-sm transition-colors"
+          className="disabled:opacity-50 text-white font-semibold px-6 py-2 rounded-lg text-sm transition-colors"
+          style={{backgroundColor: loading ? '#8a9a5b' : '#5a6e2c'}}
         >
           {loading ? 'Scanning...' : 'Scan'}
         </button>
