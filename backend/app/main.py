@@ -1,18 +1,8 @@
-from fastapi import FastAPI, Request, HTTPException, status
-from fastapi.middleware.cors import CORSMiddleware
-import os
+# Internal
+from app import create_app
 
-app = FastAPI(title="Unearth API", description="Backend API for Unearth application", version="1.0.0")
+app = create_app()
 
-# Probably not going to be necessary if using same origin for front end and back end. May be nice to have anyway for local development/testing.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-)
-
-@app.get("/api/health")
-async def health_check():
-    return {"status": "ok"}
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
