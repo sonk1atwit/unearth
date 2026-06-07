@@ -8,11 +8,6 @@ export default function Navbar({ onHome }) {
       >
         Unearth
       </span>
-      <div className="flex gap-4 text-sm text-stone-500">
-        <a href="#" className="hover:text-stone-900 transition-colors duration-200">Dashboard</a>
-        <a href="#" className="hover:text-stone-900 transition-colors duration-200">History</a>
-        <a href="#" className="hover:text-stone-900 transition-colors duration-200">Account</a>
-      </div>
     </nav>
   )
 }
