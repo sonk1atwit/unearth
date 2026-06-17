@@ -107,10 +107,15 @@ export default function ScanForm({ onResults }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   function handleScan(e) {
     e.preventDefault()
-    if (!name.trim()) return
+    if (!name.trim()) {
+      setError('Please enter your full name to start the scan.')
+      return
+    }
+    setError('')
     setLoading(true)
     setTimeout(() => {
       setLoading(false)
@@ -128,16 +133,19 @@ export default function ScanForm({ onResults }) {
       </p>
 
       <div className="animate-fade-slide-up" style={{ animationDelay: '250ms' }}>
+        {error && (
+          <p className="mt-2 text-xs text-red-500">{error}</p>
+        )}
         {loading ? (
           <DiggingLoader />
         ) : (
           <form onSubmit={handleScan} className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
-              placeholder="Full name"
+              placeholder="Full name *"
               value={name}
-              onChange={e => setName(e.target.value)}
-              className="flex-1 bg-white/80 backdrop-blur-sm border border-stone-300 rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 transition-all duration-200"
+              onChange={e => { setName(e.target.value); setError('') }}
+              className={`flex-1 bg-white/80 backdrop-blur-sm border rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 transition-all duration-200 ${error ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-stone-300 focus:border-stone-500 focus:ring-stone-200'}`}
             />
             <input
               type="text"
