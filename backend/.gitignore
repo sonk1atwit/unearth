@@ -1,1 +1,5 @@
+# Ignore environment vars and secrets
+
 .env
+secrets/*
+app/__pycache__/*
