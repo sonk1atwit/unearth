@@ -1,0 +1,14 @@
+{
+    "services":
+    {
+        "X/Twitter": {
+            "type": "social_media",
+            "query_url": "https://www.x.com/"
+        },
+        "Instagram": {
+            "type": "social_media",
+            "query_url": "https://www.instagram.com/"
+        }
+    }
+
+}

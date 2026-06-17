@@ -1,7 +1,14 @@
 services:
   api:
     build: .
-    env_file:
-      - .env
     ports:
       - "8000:8000"
+    secrets:
+      - validation_secret
+      - frontend_origin
+
+  secrets:
+    validation_secret:
+      file: ./secrets/validation_secret.txt
+    frontend_origin:
+      file: ./secrets/frontend_origin.txt
