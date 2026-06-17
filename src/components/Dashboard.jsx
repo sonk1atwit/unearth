@@ -16,24 +16,57 @@ function useCountUp(target) {
   return val
 }
 
+function ScanBanner() {
+  const [visible, setVisible] = useState(true)
+  const [fading, setFading] = useState(false)
+
+  useEffect(() => {
+    const fadeTimer = setTimeout(() => setFading(true), 2200)
+    const removeTimer = setTimeout(() => setVisible(false), 3000)
+    return () => { clearTimeout(fadeTimer); clearTimeout(removeTimer) }
+  }, [])
+
+  if (!visible) return null
+
+  return (
+    <div
+      className={`mb-6 flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium ${fading ? 'animate-fade-out-up' : 'animate-fade-slide-up'}`}
+      style={{ backgroundColor: 'rgba(90,110,44,0.08)', borderColor: 'rgba(90,110,44,0.25)', color: '#5a6e2c' }}
+    >
+      <span>✓</span>
+      <span>Scan complete — your digital footprint has been mapped.</span>
+    </div>
+  )
+}
+
 export default function Dashboard({ results }) {
   const found = results.filter(r => r.status === 'found')
   const notFound = results.filter(r => r.status === 'not_found')
 
   return (
     <div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
-        <StatCard label="Sources Scanned" value={results.length} delay={0} />
-        <StatCard label="Exposures Found" value={found.length} delay={80} valueStyle={{ color: '#b85c38' }} />
-        <StatCard label="Clear" value={notFound.length} delay={160} valueStyle={{ color: '#5a6e2c' }} />
+      <ScanBanner />
+
+      <div className="animate-fade-slide-up mb-6" style={{ animationDelay: '50ms' }}>
+        <p className="text-xs text-stone-400 uppercase tracking-widest mb-1 font-medium">Dig Report</p>
+        <h2 className="text-2xl font-bold text-stone-800">
+          {found.length} of {results.length} sources{' '}
+          <span style={{ color: '#b85c38' }}>have your data</span>
+        </h2>
+        <p className="text-sm text-stone-500 mt-1">
+          {notFound.length} source{notFound.length !== 1 ? 's' : ''} returned no results.
+        </p>
       </div>
 
-      <h2 className="animate-fade-slide-up text-lg font-semibold mb-4 text-stone-800" style={{ animationDelay: '240ms' }}>
-        Scan Results
-      </h2>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+        <StatCard label="Sources Scanned" value={results.length} delay={100} />
+        <StatCard label="Exposures Found" value={found.length} delay={180} valueStyle={{ color: '#b85c38' }} />
+        <StatCard label="Clear" value={notFound.length} delay={260} valueStyle={{ color: '#5a6e2c' }} />
+      </div>
+
       <div className="flex flex-col gap-3">
         {results.map((r, i) => (
-          <div key={r.source} className="animate-fade-slide-up" style={{ animationDelay: `${300 + i * 60}ms` }}>
+          <div key={r.source} className="animate-fade-slide-up" style={{ animationDelay: `${320 + i * 60}ms` }}>
             <ResultCard result={r} />
           </div>
         ))}
@@ -74,7 +107,10 @@ function ResultCard({ result }) {
           {found ? 'Exposed' : 'Clear'}
         </span>
         {found && (
-          <button className="text-xs bg-stone-100 hover:bg-stone-200 text-stone-700 px-3 py-1 rounded-full transition-colors duration-150">
+          <button
+            className="text-xs font-medium px-3 py-1 rounded-full text-white hover:opacity-80 transition-opacity duration-150"
+            style={{ backgroundColor: '#b85c38' }}
+          >
             Remove
           </button>
         )}

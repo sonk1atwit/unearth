@@ -25,10 +25,12 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-animated text-stone-800">
       <Navbar onHome={goHome} />
-      <main className="max-w-4xl mx-auto px-4 py-10">
-        <ScanForm onResults={setScanResults} />
-        {scanResults && <Dashboard results={scanResults} />}
-      </main>
+      <div className="dot-grid min-h-[calc(100vh-52px)]">
+        <main className="max-w-4xl mx-auto px-4 py-10">
+          <ScanForm onResults={setScanResults} />
+          {scanResults && <Dashboard results={scanResults} />}
+        </main>
+      </div>
     </div>
   )
 }

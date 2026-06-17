@@ -65,3 +65,12 @@
   background-size: 200% auto;
   animation: shimmer 3s linear infinite;
 }
+
+@keyframes fadeOutUp {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-8px); }
+}
+
+.animate-fade-out-up {
+  animation: fadeOutUp 0.8s ease forwards;
+}
