@@ -82,7 +82,7 @@ function StatCard({ label, value, delay, valueStyle }) {
       className="animate-fade-slide-up bg-white/70 backdrop-blur-sm border border-stone-200 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow duration-200"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <p className="text-xs text-stone-400 mb-1">{label}</p>
+      <p className="text-xs text-stone-400 mb-1 h-8 flex items-start">{label}</p>
       <p className="text-2xl font-bold text-stone-800" style={valueStyle}>{displayed}</p>
     </div>
   )
