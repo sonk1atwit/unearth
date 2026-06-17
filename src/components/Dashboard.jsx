@@ -49,7 +49,7 @@ export default function Dashboard({ results }) {
 
       <div className="animate-fade-slide-up mb-6" style={{ animationDelay: '50ms' }}>
         <p className="text-xs text-stone-400 uppercase tracking-widest mb-1 font-medium">Dig Report</p>
-        <h2 className="text-2xl font-bold text-stone-800">
+        <h2 className="text-xl sm:text-2xl font-bold text-stone-800">
           {found.length} of {results.length} sources{' '}
           <span style={{ color: '#b85c38' }}>have your data</span>
         </h2>
@@ -58,7 +58,7 @@ export default function Dashboard({ results }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-4 mb-8">
         <StatCard label="Sources Scanned" value={results.length} delay={100} />
         <StatCard label="Exposures Found" value={found.length} delay={180} valueStyle={{ color: '#b85c38' }} />
         <StatCard label="Clear" value={notFound.length} delay={260} valueStyle={{ color: '#5a6e2c' }} />

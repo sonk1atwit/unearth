@@ -1,9 +1,9 @@
 export default function Onboarding({ onStart }) {
   return (
     <div className="dot-grid min-h-[calc(100vh-52px)]">
-      <div className="max-w-2xl mx-auto py-16 px-4">
+      <div className="max-w-2xl mx-auto py-10 sm:py-16 px-4">
         <div className="animate-fade-slide-up" style={{ animationDelay: '0ms' }}>
-          <h1 className="text-4xl font-bold text-stone-800 mb-3 tracking-tight">
+          <h1 className="text-3xl sm:text-4xl font-bold text-stone-800 mb-3 tracking-tight">
             Welcome to <span style={{ color: '#5a6e2c' }}>Unearth</span>
           </h1>
           <p className="text-stone-500 text-base mb-10 leading-relaxed">
@@ -38,7 +38,7 @@ export default function Onboarding({ onStart }) {
         <div className="animate-fade-slide-up" style={{ animationDelay: '600ms' }}>
           <button
             onClick={onStart}
-            className="btn-shimmer text-white font-semibold px-8 py-3 rounded-lg text-sm hover:opacity-90 transition-opacity shadow-md"
+            className="btn-shimmer text-white font-semibold px-8 py-3 rounded-lg text-sm hover:opacity-90 transition-opacity shadow-md w-full sm:w-auto"
           >
             Start Scanning
           </button>
