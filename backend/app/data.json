@@ -3,12 +3,13 @@
     {
         "X/Twitter": {
             "type": "social_media",
-            "query_url": "https://www.x.com/"
+            "query_url": "https://x.com/",
+            "params": ""
         },
         "Instagram": {
             "type": "social_media",
-            "query_url": "https://www.instagram.com/"
+            "query_url": "https://www.instagram.com/",
+            "params": ""
         }
     }
-
 }

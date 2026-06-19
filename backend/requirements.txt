@@ -2,3 +2,6 @@ fastapi
 requests
 httpx
 uvicorn
+fastapi-limiter
+redis
+aioredis

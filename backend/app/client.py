@@ -13,7 +13,9 @@ class UnearthClient:
 
     async def connect(self):
         self.client = httpx.AsyncClient()
-        print(r"""░██     ░██                                              ░██    ░██        
+        print(r"""
+        
+░██     ░██                                              ░██    ░██        
 ░██     ░██                                              ░██    ░██        
 ░██     ░██ ░████████   ░███████   ░██████   ░██░████ ░████████ ░████████  
 ░██     ░██ ░██    ░██ ░██    ░██       ░██  ░███        ░██    ░██    ░██ 
@@ -21,10 +23,8 @@ class UnearthClient:
  ░██   ░██  ░██    ░██ ░██        ░██   ░██  ░██         ░██    ░██    ░██ 
   ░██████   ░██    ░██  ░███████   ░█████░██ ░██          ░████ ░██    ░██ 
                                                                            
-                                                                           
+                                        Unearth API Server version 1.1.0                               
                                                                            """)
-        print("\n")
-        print("Unearth API Server version 1.1.0")
         
     async def disconnect(self):
         if self.client:
@@ -94,7 +94,7 @@ class UnearthClient:
         if not user_query:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User query is required.")
 
-        await self.validate_request(request)
+        # await self.validate_request(request)
 
         url = url + user_query
 
@@ -103,33 +103,47 @@ class UnearthClient:
         # Exponential backoff
         while True:
             try:
-                async with self.client:
-                    resp = await self.client.request(method, url, params=params, json=json)
-                    resp.raise_for_status()
-                    return resp.json()
+                resp = await self.client.request(method, url, params=params, json=json)
+                resp.raise_for_status()
+                print(f"Response for {url}: {resp}")
+                return str(resp.status_code)
+                #return resp.text
             except (httpx.RequestError, httpx.HTTPStatusError) as e:
-                if attempt >= 2:
+                if attempt >= retries:
                     # Gateway failure if too many attempts
                     raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(e))
                 await asyncio.sleep(0.5 * (2 ** attempt))
                 attempt += 1
 
-    async def batch_call(self, type: str, query: str) -> Dict:
+    async def batch_call(self, type: str, query: str, request: Optional[Request] = None) -> Dict:
         """
         Batch call. Potentially the "catch-all" call that will query multiple popular websites simultaneously.
 
         Returns:
             Any: The aggregated results from the batch of external API calls.
         """
-        responses = {}
-        file = json.load("backend/data.json")
-
-        for site in file["services"]:
-            if site["type"] == type:
-                response = self.external_call_get(url=site["query_url"], user_query=query)
-                if response["status_code"] == "200":
-                    responses[site] = 1
+        responses: Dict[str, Any] = {}
         
+        with open("data.json", "r", encoding="utf-8") as fh:
+            data = json.load(fh)
+
+        for name, site in data.get("services", {}).items():
+            if site.get("type") != type:
+                continue
+
+            try:
+                resp = await self.external_call_get(
+                    request=request,
+                    url=site["query_url"],
+                    user_query=query
+                )
+
+                key = site.get("name") or name or site.get("query_url")
+                responses[key] = resp
+            except HTTPException as e:
+                key = site.get("name") or name or site.get("query_url")
+                responses[key] = {"error": e.detail, "status_code": e.status_code}
+
         return responses
 
 

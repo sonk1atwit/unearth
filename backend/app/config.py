@@ -8,9 +8,11 @@ class Config:
     INTERNAL_SECRET: str
     FRONTEND_ORIGIN: str
 
+    """
     @classmethod
     def read_env(cls):
         first = get_secret("validation_secret")
         second = get_secret("frontend_origin")
 
         return cls(first, second)
+    """
