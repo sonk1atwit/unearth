@@ -1,11 +1,13 @@
 import httpx
+from httpx import Response
 from fastapi import Request, HTTPException, status
 import asyncio
 from typing import Any, Optional, Dict
 import json
 
 # Internal
-from config import Config
+from .config import Config
+from .response_handler import ResponseHandler
 
 # Env vars
 
@@ -13,6 +15,7 @@ class UnearthClient:
 
     async def connect(self):
         self.client = httpx.AsyncClient()
+        self.resp_handler = ResponseHandler()
         print(r"""
         
 ░██     ░██                                              ░██    ░██        
@@ -34,34 +37,6 @@ class UnearthClient:
     def __init__(self, config: Config):
         # Init config
         self.conf = config
-    
-    async def validate_request(self, request: Request) -> None:
-        """
-        Use this function in the event of receiving incoming requests.
-
-        Args:
-            request (Request): The incoming request object from FastAPI.
-
-        Raises:
-            HTTPException (403): Forbidden error if the request is not authorized to prevent abuse of external API calls.
-
-        NOTE: Does not need to be used for every single request, but at the start of each batch. This function verifies that the request
-        received is coming exclusively from the front end. 
-        """
-        # Secret header requirement. Check for header giving proper secret and (unnecessarily) ensure env var is set
-        secret = request.headers.get("x-internal-secret")
-        if not secret or secret != self.conf._INTERNAL_SECRET:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
-
-        # Check origin and referer. Referer is important to prevent external API usage
-        origin = request.headers.get("origin")
-        referer = request.headers.get("referer")
-        if origin and origin.lower() == self.conf._ALLOWED_FRONTEND_ORIGIN.lower():
-            return
-        if referer and referer.startswith(self.conf._ALLOWED_FRONTEND_ORIGIN):
-            return
-        
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Forbidden")
 
     async def external_call_get(self, request: Request,
         url: str,
@@ -71,7 +46,7 @@ class UnearthClient:
         json: Optional[Any] = None,
         timeout: float = 10,
         retries: int = 2,
-    ) -> Any:
+    ) -> Response:
         """
         Wrapper for making external API calls with request validation.
 
@@ -106,8 +81,7 @@ class UnearthClient:
                 resp = await self.client.request(method, url, params=params, json=json)
                 resp.raise_for_status()
                 print(f"Response for {url}: {resp}")
-                return str(resp.status_code)
-                #return resp.text
+                return resp
             except (httpx.RequestError, httpx.HTTPStatusError) as e:
                 if attempt >= retries:
                     # Gateway failure if too many attempts
@@ -122,27 +96,25 @@ class UnearthClient:
         Returns:
             Any: The aggregated results from the batch of external API calls.
         """
-        responses: Dict[str, Any] = {}
+        responses: Dict[str, {int, str}] = {}
         
         with open("data.json", "r", encoding="utf-8") as fh:
             data = json.load(fh)
 
         for name, site in data.get("services", {}).items():
+            
             if site.get("type") != type:
                 continue
 
-            try:
-                resp = await self.external_call_get(
-                    request=request,
-                    url=site["query_url"],
-                    user_query=query
-                )
+            resp = await self.external_call_get(
+                request=request,
+                url=site["query_url"],
+                user_query=query
+            )
 
-                key = site.get("name") or name or site.get("query_url")
-                responses[key] = resp
-            except HTTPException as e:
-                key = site.get("name") or name or site.get("query_url")
-                responses[key] = {"error": e.detail, "status_code": e.status_code}
+            key = site.get("name") or name or site.get("query_url")
+            info_dict = self.resp_handler.response_handler(resp, site)
+            responses[key] = {info_dict[0], info_dict[1]}
 
         return responses
 

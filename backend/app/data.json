@@ -3,12 +3,35 @@
     {
         "X/Twitter": {
             "type": "social_media",
+            "error_type": "status_code",
+            "error_regex": "",
+            "body_regex": "<meta\\s+name=\"description\"\\s+content=\"([^\"]*)\"",
+            "error_code": 404,
+            "WAF": false,
+            "general_url": "https://x.com/",
             "query_url": "https://x.com/",
             "params": ""
         },
         "Instagram": {
             "type": "social_media",
-            "query_url": "https://www.instagram.com/",
+            "error_type": "idk",
+            "error_regex": "",
+            "body_regex": "",
+            "error_code": 404,
+            "WAF": true,
+            "general_url": "https://instagram.com/",
+            "query_url": "https://imginn.com/",
+            "params": ""
+        },
+        "TikTok": {
+            "type": "social_media",
+            "error_type": "message",
+            "error_regex": "\"statusCode\"\\s*:\\s*10221",
+            "body_regex": "\"signature\"\\s*:\\s*\"([^\"]+)\"",
+            "error_code": 404,
+            "WAF": false,
+            "general_url": "https://tiktok.com/",
+            "query_url": "https://tiktok.com/",
             "params": ""
         }
     }

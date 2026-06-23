@@ -1,5 +1,4 @@
 import requests
-import backend.app.client as client
 
 class Session:
     def __init__(self, session_id: str):
