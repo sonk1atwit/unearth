@@ -1,5 +1,15 @@
 import { useState, useEffect } from 'react'
 
+const OPT_OUT_INFO = {
+  'Spokeo':       { url: 'https://optout.spokeo.com', steps: 'Search for your name on the opt-out page, select your listing, and submit the removal form.' },
+  'WhitePages':   { url: 'https://www.whitepages.com/suppression_requests', steps: 'Enter your information on the suppression request page and submit.' },
+  'BeenVerified': { url: 'https://www.beenverified.com/opt-out', steps: 'Enter your name and state, locate your record, and submit the opt-out request.' },
+  'LinkedIn':     { url: 'https://www.linkedin.com/psettings/privacy', steps: 'Go to Settings > Visibility and restrict who can see your profile and contact information.' },
+  'Facebook':     { url: 'https://www.facebook.com/privacy', steps: 'Go to Settings > Privacy and limit who can search for you and see your information.' },
+  'Intelius':     { url: 'https://www.intelius.com/opt-out', steps: 'Search for your record on the opt-out page and submit a removal request.' },
+  'PeopleFinder': { url: 'https://www.peoplefinders.com/manage', steps: 'Search for your record and follow the steps to request removal.' },
+}
+
 function useCountUp(target) {
   const [val, setVal] = useState(0)
   useEffect(() => {
@@ -27,7 +37,6 @@ function ScanBanner() {
   }, [])
 
   if (!visible) return null
-
   return (
     <div
       className={`mb-6 flex items-center gap-2 px-4 py-3 rounded-xl border text-sm font-medium ${fading ? 'animate-fade-out-up' : 'animate-fade-slide-up'}`}
@@ -39,9 +48,176 @@ function ScanBanner() {
   )
 }
 
+function DonutChart({ found, total }) {
+  const [animated, setAnimated] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 150)
+    return () => clearTimeout(t)
+  }, [])
+
+  const radius = 58
+  const circumference = 2 * Math.PI * radius
+  const foundLen = animated ? circumference * (found / total) : 0
+  const clearLen = animated ? circumference * ((total - found) / total) : 0
+
+  return (
+    <div className="flex flex-col items-center gap-2">
+      <svg viewBox="0 0 160 160" className="w-36 h-36">
+        <circle cx="80" cy="80" r={radius} fill="none" stroke="#e7e5e4" strokeWidth="16" />
+        <circle
+          cx="80" cy="80" r={radius} fill="none"
+          stroke="#4ade80" strokeWidth="16" strokeLinecap="round"
+          strokeDasharray={`${clearLen} ${circumference}`}
+          strokeDashoffset={-foundLen}
+          transform="rotate(-90 80 80)"
+          style={{ transition: 'stroke-dasharray 0.9s ease, stroke-dashoffset 0.9s ease' }}
+        />
+        <circle
+          cx="80" cy="80" r={radius} fill="none"
+          stroke="#fb923c" strokeWidth="16" strokeLinecap="round"
+          strokeDasharray={`${foundLen} ${circumference}`}
+          transform="rotate(-90 80 80)"
+          style={{ transition: 'stroke-dasharray 0.9s ease' }}
+        />
+        <text x="80" y="72" textAnchor="middle" fill="#1c1917" fontSize="30" fontWeight="bold">{found}</text>
+        <text x="80" y="93" textAnchor="middle" fill="#78716c" fontSize="11">of {total} exposed</text>
+      </svg>
+      <div className="flex gap-3 text-xs text-stone-500">
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{backgroundColor:'#fb923c'}} />Exposed</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{backgroundColor:'#4ade80'}} />Clear</span>
+      </div>
+    </div>
+  )
+}
+
+function CategoryBreakdown({ results }) {
+  const [animated, setAnimated] = useState(false)
+  useEffect(() => {
+    const t = setTimeout(() => setAnimated(true), 400)
+    return () => clearTimeout(t)
+  }, [])
+
+  const groups = {}
+  results.forEach(r => {
+    if (!groups[r.type]) groups[r.type] = { found: 0, total: 0 }
+    groups[r.type].total++
+    if (r.status === 'found') groups[r.type].found++
+  })
+
+  return (
+    <div className="flex-1 space-y-3 w-full">
+      {Object.entries(groups).map(([type, counts]) => {
+        const pct = Math.round((counts.found / counts.total) * 100)
+        return (
+          <div key={type}>
+            <div className="flex justify-between text-xs mb-1">
+              <span className="text-stone-600 font-medium">{type}</span>
+              <span className="text-stone-400">{counts.found}/{counts.total} exposed</span>
+            </div>
+            <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: animated ? `${pct}%` : '0%',
+                  backgroundColor: counts.found > 0 ? '#fb923c' : '#4ade80',
+                  transition: 'width 0.8s ease'
+                }}
+              />
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function RemovalModal({ source, onClose }) {
+  const [copied, setCopied] = useState(false)
+  const info = OPT_OUT_INFO[source] || { url: null, steps: 'Visit the company\'s website and look for a Privacy or Opt-Out page.' }
+
+  const isSocialMedia = ['LinkedIn', 'Facebook'].includes(source)
+
+  const template = `Subject: Personal Data Removal Request
+
+To Whom It May Concern at ${source},
+
+I am writing to formally request the removal of my personal information from your database and any public-facing records or directories.
+
+I have the right to request deletion of my personal data. Please remove all records associated with my name from your systems and confirm once this has been completed.
+
+Thank you,
+[Your Name]`
+
+  function handleCopy() {
+    navigator.clipboard.writeText(template)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="fixed inset-0 bg-stone-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 animate-fade-slide-up" onClick={e => e.stopPropagation()}>
+
+        <div className="flex items-start justify-between mb-4">
+          <div>
+            <p className="text-xs text-stone-400 uppercase tracking-widest font-medium mb-0.5">Removal Request</p>
+            <h3 className="text-lg font-bold text-stone-800">{source}</h3>
+          </div>
+          <button onClick={onClose} className="text-stone-400 hover:text-stone-600 transition-colors text-xl leading-none">×</button>
+        </div>
+
+        <div className="mb-4 bg-stone-50 rounded-xl p-4 border border-stone-100">
+          <p className="text-xs font-semibold text-stone-500 uppercase tracking-widest mb-2">Steps</p>
+          <p className="text-sm text-stone-600 leading-relaxed">{info.steps}</p>
+          {info.url && (
+            <a
+              href={info.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-3 text-xs font-semibold px-3 py-1.5 rounded-lg text-white hover:opacity-85 transition-opacity"
+              style={{ backgroundColor: '#5a6e2c' }}
+            >
+              Go to opt-out page →
+            </a>
+          )}
+        </div>
+
+        {!isSocialMedia && (
+          <div className="mb-4">
+            <p className="text-xs font-semibold text-stone-500 uppercase tracking-widest mb-2">Email Template</p>
+            <textarea
+              readOnly
+              value={template}
+              className="w-full text-xs text-stone-600 bg-stone-50 border border-stone-200 rounded-xl p-3 h-40 resize-none focus:outline-none font-mono"
+            />
+            <button
+              onClick={handleCopy}
+              className="mt-2 text-xs font-medium px-4 py-2 rounded-lg border transition-all duration-200"
+              style={copied
+                ? { backgroundColor: 'rgba(90,110,44,0.08)', borderColor: 'rgba(90,110,44,0.3)', color: '#5a6e2c' }
+                : { backgroundColor: '#f5f4f2', borderColor: '#e7e5e4', color: '#57534e' }
+              }
+            >
+              {copied ? '✓ Copied' : 'Copy email'}
+            </button>
+          </div>
+        )}
+
+        <button
+          onClick={onClose}
+          className="w-full text-sm text-stone-500 hover:text-stone-700 transition-colors pt-2"
+        >
+          Close
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function Dashboard({ results }) {
   const found = results.filter(r => r.status === 'found')
   const notFound = results.filter(r => r.status === 'not_found')
+  const [removalSource, setRemovalSource] = useState(null)
 
   return (
     <div>
@@ -58,19 +234,28 @@ export default function Dashboard({ results }) {
         </p>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      <div className="grid grid-cols-3 gap-4 mb-6">
         <StatCard label="Sources Scanned" value={results.length} delay={100} />
         <StatCard label="Exposures Found" value={found.length} delay={180} valueStyle={{ color: '#b85c38' }} />
         <StatCard label="Clear" value={notFound.length} delay={260} valueStyle={{ color: '#5a6e2c' }} />
       </div>
 
+      <div className="animate-fade-slide-up bg-white/70 backdrop-blur-sm border border-stone-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center gap-6" style={{ animationDelay: '300ms' }}>
+        <DonutChart found={found.length} total={results.length} />
+        <CategoryBreakdown results={results} />
+      </div>
+
       <div className="flex flex-col gap-3">
         {results.map((r, i) => (
-          <div key={r.source} className="animate-fade-slide-up" style={{ animationDelay: `${320 + i * 60}ms` }}>
-            <ResultCard result={r} />
+          <div key={r.source} className="animate-fade-slide-up" style={{ animationDelay: `${380 + i * 60}ms` }}>
+            <ResultCard result={r} onRemove={setRemovalSource} />
           </div>
         ))}
       </div>
+
+      {removalSource && (
+        <RemovalModal source={removalSource} onClose={() => setRemovalSource(null)} />
+      )}
     </div>
   )
 }
@@ -88,7 +273,7 @@ function StatCard({ label, value, delay, valueStyle }) {
   )
 }
 
-function ResultCard({ result }) {
+function ResultCard({ result, onRemove }) {
   const found = result.status === 'found'
   return (
     <div
@@ -108,6 +293,7 @@ function ResultCard({ result }) {
         </span>
         {found && (
           <button
+            onClick={() => onRemove(result.source)}
             className="text-xs font-medium px-3 py-1 rounded-full text-white hover:opacity-80 transition-opacity duration-150"
             style={{ backgroundColor: '#b85c38' }}
           >
