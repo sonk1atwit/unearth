@@ -49,7 +49,7 @@ export default function App() {
       <div className="dot-grid flex-1">
         <main className="max-w-4xl mx-auto px-4 py-10">
           <ScanForm onResults={setScanResults} />
-          {scanResults && <Dashboard results={scanResults} />}
+          {scanResults && <Dashboard results={scanResults} onNewScan={() => setScanResults(null)} />}
         </main>
       </div>
       <Footer />

@@ -1,13 +1,20 @@
 import { useState, useEffect } from 'react'
 
 const OPT_OUT_INFO = {
-  'Spokeo':       { url: 'https://optout.spokeo.com', steps: 'Search for your name on the opt-out page, select your listing, and submit the removal form.' },
-  'WhitePages':   { url: 'https://www.whitepages.com/suppression_requests', steps: 'Enter your information on the suppression request page and submit.' },
-  'BeenVerified': { url: 'https://www.beenverified.com/opt-out', steps: 'Enter your name and state, locate your record, and submit the opt-out request.' },
-  'LinkedIn':     { url: 'https://www.linkedin.com/psettings/privacy', steps: 'Go to Settings > Visibility and restrict who can see your profile and contact information.' },
-  'Facebook':     { url: 'https://www.facebook.com/privacy', steps: 'Go to Settings > Privacy and limit who can search for you and see your information.' },
-  'Intelius':     { url: 'https://www.intelius.com/opt-out', steps: 'Search for your record on the opt-out page and submit a removal request.' },
-  'PeopleFinder': { url: 'https://www.peoplefinders.com/manage', steps: 'Search for your record and follow the steps to request removal.' },
+  'Spokeo':           { url: 'https://optout.spokeo.com', steps: 'Search for your name on the opt-out page, select your listing, and submit the removal form.' },
+  'WhitePages':       { url: 'https://www.whitepages.com/suppression_requests', steps: 'Enter your information on the suppression request page and submit.' },
+  'FastPeopleSearch': { url: 'https://www.fastpeoplesearch.com/removal', steps: 'Find your listing on the removal page and submit a request to have it taken down.' },
+  'Radaris':          { url: 'https://radaris.com/control/privacy', steps: 'Go to the privacy control page, search for your profile, and request removal.' },
+  'ZabaSearch':       { url: 'https://www.zabasearch.com/block_access/', steps: 'Fill out the opt-out form with your name and state to block your listing.' },
+  'MyLife':           { url: 'https://www.mylife.com/privacy-policy/index.pubview', steps: 'Contact MyLife directly via their privacy page to request profile removal.' },
+  'BeenVerified':     { url: 'https://www.beenverified.com/opt-out', steps: 'Enter your name and state, locate your record, and submit the opt-out request.' },
+  'TruthFinder':      { url: 'https://www.truthfinder.com/opt-out', steps: 'Go to the opt-out page, search for your record, and submit a removal request.' },
+  'Instant Checkmate':{ url: 'https://www.instantcheckmate.com/opt-out', steps: 'Visit the opt-out page, search for your listing, and submit a removal request.' },
+  'LinkedIn':         { url: 'https://www.linkedin.com/psettings/privacy', steps: 'Go to Settings > Visibility and restrict who can see your profile and contact information.' },
+  'Facebook':         { url: 'https://www.facebook.com/privacy', steps: 'Go to Settings > Privacy and limit who can search for you and see your information.' },
+  'Twitter/X':        { url: 'https://twitter.com/settings/account', steps: 'Go to Settings > Privacy and Safety to restrict who can find and see your account.' },
+  'Intelius':         { url: 'https://www.intelius.com/opt-out', steps: 'Search for your record on the opt-out page and submit a removal request.' },
+  'PeopleFinder':     { url: 'https://www.peoplefinders.com/manage', steps: 'Search for your record and follow the steps to request removal.' },
 }
 
 function useCountUp(target) {
@@ -214,24 +221,42 @@ Thank you,
   )
 }
 
-export default function Dashboard({ results }) {
+export default function Dashboard({ results, onNewScan }) {
   const found = results.filter(r => r.status === 'found')
   const notFound = results.filter(r => r.status === 'not_found')
   const [removalSource, setRemovalSource] = useState(null)
+  const [statusFilter, setStatusFilter] = useState('All')
+  const [typeFilter, setTypeFilter] = useState('All Types')
+
+  const types = [...new Set(results.map(r => r.type))]
+
+  const filtered = results
+    .filter(r => statusFilter === 'All' || (statusFilter === 'Exposed' ? r.status === 'found' : r.status === 'not_found'))
+    .filter(r => typeFilter === 'All Types' || r.type === typeFilter)
 
   return (
     <div>
       <ScanBanner />
 
-      <div className="animate-fade-slide-up mb-6" style={{ animationDelay: '50ms' }}>
-        <p className="text-xs text-stone-400 uppercase tracking-widest mb-1 font-medium">Dig Report</p>
-        <h2 className="text-xl sm:text-2xl font-bold text-stone-800">
-          {found.length} of {results.length} sources{' '}
-          <span style={{ color: '#b85c38' }}>have your data</span>
-        </h2>
-        <p className="text-sm text-stone-500 mt-1">
-          {notFound.length} source{notFound.length !== 1 ? 's' : ''} returned no results.
-        </p>
+      <div className="animate-fade-slide-up mb-6 flex flex-col sm:flex-row sm:items-end justify-between gap-2" style={{ animationDelay: '50ms' }}>
+        <div>
+          <p className="text-xs text-stone-400 uppercase tracking-widest mb-1 font-medium">Dig Report</p>
+          <h2 className="text-xl sm:text-2xl font-bold text-stone-800">
+            {found.length} of {results.length} sources{' '}
+            <span style={{ color: '#b85c38' }}>have your data</span>
+          </h2>
+          <p className="text-sm text-stone-500 mt-1">
+            {notFound.length} source{notFound.length !== 1 ? 's' : ''} returned no results.
+          </p>
+        </div>
+        {onNewScan && (
+          <button
+            onClick={onNewScan}
+            className="self-start sm:self-auto text-xs font-medium px-4 py-2 rounded-lg border border-stone-300 text-stone-500 hover:bg-stone-50 transition-colors"
+          >
+            New Scan
+          </button>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
@@ -245,12 +270,44 @@ export default function Dashboard({ results }) {
         <CategoryBreakdown results={results} />
       </div>
 
-      <div className="flex flex-col gap-3">
-        {results.map((r, i) => (
-          <div key={r.source} className="animate-fade-slide-up" style={{ animationDelay: `${380 + i * 60}ms` }}>
-            <ResultCard result={r} onRemove={setRemovalSource} />
-          </div>
+      <div className="animate-fade-slide-up mb-4 flex flex-wrap gap-2" style={{ animationDelay: '360ms' }}>
+        {['All', 'Exposed', 'Clear'].map(f => (
+          <button
+            key={f}
+            onClick={() => setStatusFilter(f)}
+            className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
+            style={statusFilter === f
+              ? { backgroundColor: '#5a6e2c', color: 'white' }
+              : { backgroundColor: '#f5f4f2', color: '#78716c' }}
+          >
+            {f}
+          </button>
         ))}
+        <span className="w-px bg-stone-200 mx-1" />
+        {['All Types', ...types].map(f => (
+          <button
+            key={f}
+            onClick={() => setTypeFilter(f)}
+            className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
+            style={typeFilter === f
+              ? { backgroundColor: '#b85c38', color: 'white' }
+              : { backgroundColor: '#f5f4f2', color: '#78716c' }}
+          >
+            {f}
+          </button>
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-3">
+        {filtered.length === 0 ? (
+          <p className="text-sm text-stone-400 text-center py-8">No results match the selected filters.</p>
+        ) : (
+          filtered.map((r, i) => (
+            <div key={r.source} className="animate-fade-slide-up" style={{ animationDelay: `${400 + i * 50}ms` }}>
+              <ResultCard result={r} onRemove={setRemovalSource} />
+            </div>
+          ))
+        )}
       </div>
 
       {removalSource && (
