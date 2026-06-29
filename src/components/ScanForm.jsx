@@ -118,7 +118,7 @@ export default function ScanForm({ onResults }) {
   const [error, setError] = useState('')
   const [scanFailed, setScanFailed] = useState(false)
 
-  function handleScan(e) {
+  async function handleScan(e) {
     e.preventDefault()
     if (!name.trim()) {
       setError('Please enter your full name to start the scan.')
@@ -127,10 +127,26 @@ export default function ScanForm({ onResults }) {
     setError('')
     setScanFailed(false)
     setLoading(true)
-    setTimeout(() => {
+
+    try {
+      const res = await fetch(`/api/batch?service_type=social_media&query=${encodeURIComponent(name)}`)
+      if (!res.ok) throw new Error(`Server returned ${res.status}`)
+      const data = await res.json()
+
+      const results = Object.entries(data).map(([source, result]) => ({
+        source,
+        type: 'Social Media',
+        status: result[0] === 1 ? 'found' : 'not_found',
+        detail: result[1] || 'No additional information.',
+      }))
+
       setLoading(false)
-      onResults(MOCK_RESULTS)
-    }, 3600)
+      onResults(results.length > 0 ? results : MOCK_RESULTS)
+    } catch (err) {
+      console.error('Scan failed:', err)
+      setLoading(false)
+      setScanFailed(true)
+    }
   }
 
   function handleRetry() {
