@@ -12,26 +12,26 @@
             "query_url": "https://x.com/",
             "params": ""
         },
-        "Instagram": {
+        "Facebook": {
             "type": "social_media",
-            "error_type": "idk",
-            "error_regex": "",
-            "body_regex": "",
+            "error_type": "message",
+            "error_regex": "\\\"title\\\":\\\"This content isn't available right now\\\"",
+            "body_regex": "<meta\\s+property=\\\"og:description\\\"\\s+content=\\\"(?P<name>[^.]+?)\\.", 
             "error_code": 404,
-            "WAF": true,
-            "general_url": "https://instagram.com/",
-            "query_url": "https://imginn.com/",
+            "WAF": false,
+            "general_url": "https://facebook.com/",
+            "query_url": "https://www.facebook.com/",
             "params": ""
         },
         "TikTok": {
             "type": "social_media",
             "error_type": "message",
-            "error_regex": "\"statusCode\"\\s*:\\s*10221",
-            "body_regex": "\"signature\"\\s*:\\s*\"([^\"]+)\"",
+            "error_regex": "\\\"statusCode\\\"\\s*:\\s*10221",
+            "body_regex": "\\\"signature\\\"\\s*:\\s*\\\"(?P<value>[^\\\"]*)\\\"",
             "error_code": 404,
             "WAF": false,
             "general_url": "https://tiktok.com/",
-            "query_url": "https://tiktok.com/",
+            "query_url": "https://www.tiktok.com/@",
             "params": ""
         }
     }

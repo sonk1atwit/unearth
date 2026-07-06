@@ -6,8 +6,8 @@ from typing import Any, Optional, Dict
 import json
 
 # Internal
-from .config import Config
-from .response_handler import ResponseHandler
+from config import Config
+from response_handler import ResponseHandler
 
 # Env vars
 
@@ -72,17 +72,29 @@ class UnearthClient:
         # await self.validate_request(request)
 
         url = url + user_query
+        print(f"[DEBUG] Requesting URL: {url}")
 
         attempt = 0
 
         # Exponential backoff
         while True:
             try:
-                resp = await self.client.request(method, url, params=params, json=json)
-                resp.raise_for_status()
+                resp = await self.client.request(method, url, params=params, json=json, timeout=timeout)
+
+                """
+                print(f"[DEBUG] Status {resp.status_code} for {url}")
+                if resp.history:
+                    print(f"[DEBUG] Redirect history: {[(r.status_code, str(r.url)) for r in resp.history]}")
+                if resp.is_redirect:
+                    print(f"[DEBUG] Final redirect target: {resp.headers.get('location')}")
+                """
+
+                if resp.is_error and resp.status_code >= 500:
+                    raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=f"Upstream service error: {resp.status_code}")
+
                 print(f"Response for {url}: {resp}")
                 return resp
-            except (httpx.RequestError, httpx.HTTPStatusError) as e:
+            except (httpx.RequestError, HTTPException) as e:
                 if attempt >= retries:
                     # Gateway failure if too many attempts
                     raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY, detail=str(e))
@@ -96,7 +108,7 @@ class UnearthClient:
         Returns:
             Any: The aggregated results from the batch of external API calls.
         """
-        responses: Dict[str, {int, str}] = {}
+        responses: Dict[str, Dict[str, Any]] = {}
         
         with open("data.json", "r", encoding="utf-8") as fh:
             data = json.load(fh)
@@ -106,15 +118,20 @@ class UnearthClient:
             if site.get("type") != type:
                 continue
 
-            resp = await self.external_call_get(
-                request=request,
-                url=site["query_url"],
-                user_query=query
-            )
+            try:
+                resp = await self.external_call_get(
+                    request=request,
+                    url=site["query_url"],
+                    user_query=query
+                )
+            except HTTPException as exc:
+                key = site.get("name") or name or site.get("query_url")
+                responses[key] = {"code": 2, "info": str(exc.detail)}
+                continue
 
             key = site.get("name") or name or site.get("query_url")
             info_dict = self.resp_handler.response_handler(resp, site)
-            responses[key] = {info_dict[0], info_dict[1]}
+            responses[key] = info_dict
 
         return responses
 
