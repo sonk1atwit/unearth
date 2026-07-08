@@ -5,3 +5,4 @@ uvicorn
 fastapi-limiter
 redis
 aioredis
+user-scanner

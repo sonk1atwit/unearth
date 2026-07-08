@@ -23,7 +23,10 @@ app = FastAPI(title="Unearth API", description="Backend API for Unearth applicat
 async def health_check():
     return {"status": "ok"}
 
-@app.get("/api/batch")
-async def batch_request(request: Request, service_type: str, query: str):
-    # await request.app.state.client.validate_request(request)
-    return await request.app.state.client.batch_call(service_type, query)
+@app.get("/api/batch-user")
+async def batch_user(request: Request, service_type: str, query: str):
+    return await request.app.state.client.scanner_batch_call(service_type, query, False)
+
+@app.get("/api/batch-email")
+async def batch_email(request: Request, service_type: str, query: str):
+    return await request.app.state.client.scanner_batch_call(service_type, query, True)

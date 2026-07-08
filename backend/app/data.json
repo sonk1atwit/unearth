@@ -5,9 +5,8 @@
             "type": "social_media",
             "error_type": "status_code",
             "error_regex": "",
-            "body_regex": "<meta\\s+name=\"description\"\\s+content=\"([^\"]*)\"",
+            "body_regex": "<meta\\s+name=\\\"twitter:title\\\"\\s+content=\\\"[^\\\"]*\\\"[^>]*>\\s*<meta\\s+name=\\\"twitter:description\\\"\\s+content=\\\"([^\\\"]*)\\\"",
             "error_code": 404,
-            "WAF": false,
             "general_url": "https://x.com/",
             "query_url": "https://x.com/",
             "params": ""
@@ -18,7 +17,6 @@
             "error_regex": "\\\"title\\\":\\\"This content isn't available right now\\\"",
             "body_regex": "<meta\\s+property=\\\"og:description\\\"\\s+content=\\\"(?P<name>[^.]+?)\\.", 
             "error_code": 404,
-            "WAF": false,
             "general_url": "https://facebook.com/",
             "query_url": "https://www.facebook.com/",
             "params": ""
@@ -29,9 +27,38 @@
             "error_regex": "\\\"statusCode\\\"\\s*:\\s*10221",
             "body_regex": "\\\"signature\\\"\\s*:\\s*\\\"(?P<value>[^\\\"]*)\\\"",
             "error_code": 404,
-            "WAF": false,
             "general_url": "https://tiktok.com/",
             "query_url": "https://www.tiktok.com/@",
+            "params": ""
+        },
+        "Reddit": {
+            "type": "social_media",
+            "error_type": "message",
+            "error_regex": "",
+            "body_regex": "",
+            "error_code": 404,
+            "general_url": "https://reddit.com/",
+            "query_url": "https://reddit.com/user/",
+            "params": ""
+        },
+        "YouTube": {
+            "type": "entertainment",
+            "error_type": "status_code",
+            "error_regex": "",
+            "body_regex": "<meta\\s+property=\\\"og:description\\\"\\s+content=\\\"(?P<description>.*?)\\\"",
+            "error_code": 404,
+            "general_url": "https://youtube.com/",
+            "query_url": "https://www.youtube.com/",
+            "params": ""
+        },
+        "Twitch": {
+            "type": "entertainment",
+            "error_type": "message",
+            "error_regex": "<meta\\s+property=\\\"og:description\\\"\\s+content=\\\"Twitch is the world&#39;s leading video platform and community for gamers\\.[^>]*>",
+            "body_regex": "<meta\\s+property=\"og:description\"\\s+content=\"([^\"]*)\"",
+            "error_code": 404,
+            "general_url": "https://twitch.tv/",
+            "query_url": "https://www.twitch.tv/",
             "params": ""
         }
     }

@@ -2,8 +2,9 @@ import httpx
 from httpx import Response
 from fastapi import Request, HTTPException, status
 import asyncio
-from typing import Any, Optional, Dict
+from typing import Any, Optional, Dict, List
 import json
+from user_scanner.core import engine
 
 # Internal
 from config import Config
@@ -17,16 +18,17 @@ class UnearthClient:
         self.client = httpx.AsyncClient()
         self.resp_handler = ResponseHandler()
         print(r"""
-        
-░██     ░██                                              ░██    ░██        
-░██     ░██                                              ░██    ░██        
-░██     ░██ ░████████   ░███████   ░██████   ░██░████ ░████████ ░████████  
-░██     ░██ ░██    ░██ ░██    ░██       ░██  ░███        ░██    ░██    ░██ 
-░██     ░██ ░██    ░██ ░█████████  ░███████  ░██         ░██    ░██    ░██ 
- ░██   ░██  ░██    ░██ ░██        ░██   ░██  ░██         ░██    ░██    ░██ 
-  ░██████   ░██    ░██  ░███████   ░█████░██ ░██          ░████ ░██    ░██ 
-                                                                           
-                                        Unearth API Server version 1.1.0                               
+/////////////////////////////////////////////////////////////////////////////        
+/░██     ░██                                              ░██    ░██        /
+/░██     ░██                                              ░██    ░██        /
+/░██     ░██ ░████████   ░███████   ░██████   ░██░████ ░████████ ░████████  /
+/░██     ░██ ░██    ░██ ░██    ░██       ░██  ░███        ░██    ░██    ░██ /
+/░██     ░██ ░██    ░██ ░█████████  ░███████  ░██         ░██    ░██    ░██ /
+/ ░██   ░██  ░██    ░██ ░██        ░██   ░██  ░██         ░██    ░██    ░██ /
+/  ░██████   ░██    ░██  ░███████   ░█████░██ ░██          ░████ ░██    ░██ /
+/                                                                           /
+/                                        Unearth API Server version 1.1.0   /
+/////////////////////////////////////////////////////////////////////////////                             
                                                                            """)
         
     async def disconnect(self):
@@ -38,7 +40,50 @@ class UnearthClient:
         # Init config
         self.conf = config
 
-    async def external_call_get(self, request: Request,
+    async def scanner_batch_call(self, type: str, query: str, use_email: bool = True) -> List[Dict[str, Any]]:
+        """
+        Wrapper for using user-scanner to make batch calls across different service types to check for username or email.
+
+        Args:
+            type (str): The service type (social, entertainment, dev, etc) to search across.
+            query (str): The string containing the query content (should be an email or username)
+            use_email (bool): A boolean value indicating whether to search email or not. (False = username search instead)
+        
+        Raises:
+            HTTPException (400): Bad request if query or type are empty.
+
+        Returns:
+            List[Dict[str, any]]: A list of JSON objects containing information regarding the query. JSON object content will vary.
+        """
+        if not query:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User query is required.")
+        if not type:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Service type is required.")
+        
+        if (type == "all"):
+            results = await engine.check_all(query, use_email)
+        else:
+            results = await engine.check_category(type, query, use_email)
+
+        data: List[Dict[str, Any]] = []
+
+        for result in results:
+            resultdict = result.to_dict()
+            if (use_email == True):
+                if resultdict.get("status") == "Registered":
+                    data.append(resultdict)
+            else:
+                if resultdict.get("status") == "Found":
+                    data.append(resultdict)
+
+        totals = {"Total sites searched": len(results),
+                  "Total Hits": len(data)}
+        
+        data.insert(0, totals)
+
+        return data
+    
+    async def external_call_get_user(self, request: Request,
         url: str,
         method: str = "GET",
         params: Optional[Dict[str, Any]] = None,
@@ -101,9 +146,9 @@ class UnearthClient:
                 await asyncio.sleep(0.5 * (2 ** attempt))
                 attempt += 1
 
-    async def batch_call(self, type: str, query: str, request: Optional[Request] = None) -> Dict:
+    async def batch_call_user(self, type: str, query: str, request: Optional[Request] = None) -> Dict:
         """
-        Batch call. Potentially the "catch-all" call that will query multiple popular websites simultaneously.
+        Batch call. The custom logic "catch-all" call that will query multiple popular websites simultaneously for usernames.
 
         Returns:
             Any: The aggregated results from the batch of external API calls.
@@ -119,7 +164,7 @@ class UnearthClient:
                 continue
 
             try:
-                resp = await self.external_call_get(
+                resp = await self.external_call_get_user(
                     request=request,
                     url=site["query_url"],
                     user_query=query
@@ -130,7 +175,7 @@ class UnearthClient:
                 continue
 
             key = site.get("name") or name or site.get("query_url")
-            info_dict = self.resp_handler.response_handler(resp, site)
+            info_dict = self.resp_handler.response_handler_user(resp, site)
             responses[key] = info_dict
 
         return responses

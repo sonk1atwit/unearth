@@ -1,10 +1,28 @@
 from httpx import Response
 from typing import Any, Dict
 import re
+import html
 
 class ResponseHandler:
+
+    def normalize_match(self, value: str) -> str:
+        """
+        Normalizes HTML text blocks by allowing for escape characters to work properly and decode HTML entities.
+
+        Args:
+            value (str): The string value to parse
+        
+        Returns:
+            str: The "cleaned" HTML response. 
+        """
+        if not value:
+            return ""
+        cleaned = html.unescape(value)
+        cleaned = cleaned.replace("\\n", "\n").replace("\\r", "\r").replace("\\t", "\t")
+        cleaned = re.sub(r"\s+", " ", cleaned).strip()
+        return cleaned
     
-    def response_handler(self, resp: Response, site: Any) -> Dict[str, Any]:
+    def response_handler_user(self, resp: Response, site: Any) -> Dict[str, Any]:
         """
         Response handler. Takes a response from a website and its corresponding json object to iterate through and
         interpret results.
@@ -39,11 +57,12 @@ class ResponseHandler:
                 code = 0
                 info = "User not found."
             elif(body_match):
-                info = body_match.groupdict().get("value", body_match.group(1))
+                raw_info = body_match.groupdict().get("value", body_match.group(1))
+                info = self.normalize_match(raw_info)
                 code = 1
             else:
-                info = "Error fetching error code and/or response body."
-                code = 2
+                info = ""
+                code = 1
         
         # Standard code error type
         if(error_type == "status_code"):
@@ -55,10 +74,11 @@ class ResponseHandler:
                 code = 0
                 info = "User not found."
             elif (body_match):
-                info = body_match.groupdict().get("value", body_match.group(1))
+                raw_info = body_match.groupdict().get("value", body_match.group(1))
+                info = self.normalize_match(raw_info)
                 code = 1
             else:
-                info = "Error fetching error code and response body."
-                code = 2
+                info = ""
+                code = 1
 
         return {"code": code, "info": info}
