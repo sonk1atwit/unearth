@@ -118,7 +118,7 @@ export default function ScanForm({ onResults }) {
   const [error, setError] = useState('')
   const [scanFailed, setScanFailed] = useState(false)
 
-  function handleScan(e) {
+  async function handleScan(e) {
     e.preventDefault()
     if (!name.trim()) {
       setError('Please enter your full name to start the scan.')
@@ -127,10 +127,48 @@ export default function ScanForm({ onResults }) {
     setError('')
     setScanFailed(false)
     setLoading(true)
-    setTimeout(() => {
+
+    try {
+      const requests = [
+        fetch(`/api/batch-user?service_type=all&query=${encodeURIComponent(name.trim())}`)
+      ]
+      if (email.trim()) {
+        requests.push(
+          fetch(`/api/batch-email?service_type=all&query=${encodeURIComponent(email.trim())}`)
+        )
+      }
+
+      const responses = await Promise.all(requests)
+      for (const res of responses) {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      }
+
+      const jsonResults = await Promise.all(responses.map(r => r.json()))
+
+      const combined = []
+      const seen = new Set()
+
+      for (const data of jsonResults) {
+        const items = Array.isArray(data) ? data.slice(1) : []
+        for (const item of items) {
+          const key = item.site_name
+          if (seen.has(key)) continue
+          seen.add(key)
+          combined.push({
+            source: item.site_name,
+            type: item.category || 'Other',
+            status: (item.status === 'Found' || item.status === 'Registered') ? 'found' : 'not_found',
+            detail: item.url || item.reason || 'Listed in public records.',
+          })
+        }
+      }
+
       setLoading(false)
-      onResults(MOCK_RESULTS)
-    }, 3600)
+      onResults(combined)
+    } catch {
+      setLoading(false)
+      setScanFailed(true)
+    }
   }
 
   function handleRetry() {
