@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request
 
 # Internal
-from client import UnearthClient
-from config import Config
+from .client import UnearthClient
+from .config import Config
 
 async def lifespan(app: FastAPI):
 

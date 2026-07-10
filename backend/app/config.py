@@ -1,4 +1,4 @@
-from secret_management import get_secret
+from .secret_management import get_secret
 from dataclasses import dataclass
 
 # Immutable data class to ensure env vars are never modified

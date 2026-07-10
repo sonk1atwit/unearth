@@ -7,8 +7,8 @@ import json
 from user_scanner.core import engine
 
 # Internal
-from config import Config
-from response_handler import ResponseHandler
+from .config import Config
+from .response_handler import ResponseHandler
 
 # Env vars
 
