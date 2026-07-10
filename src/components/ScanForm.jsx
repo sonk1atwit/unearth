@@ -120,8 +120,8 @@ export default function ScanForm({ onResults }) {
 
   async function handleScan(e) {
     e.preventDefault()
-    if (!name.trim()) {
-      setError('Please enter your full name to start the scan.')
+    if (!name.trim() && !email.trim()) {
+      setError('Please enter a name or email to start the scan.')
       return
     }
     setError('')
@@ -129,13 +129,12 @@ export default function ScanForm({ onResults }) {
     setLoading(true)
 
     try {
-      const requests = [
-        fetch(`/api/batch-user?service_type=all&query=${encodeURIComponent(name.trim())}`)
-      ]
+      const requests = []
+      if (name.trim()) {
+        requests.push(fetch(`/api/batch-user?service_type=all&query=${encodeURIComponent(name.trim())}`))
+      }
       if (email.trim()) {
-        requests.push(
-          fetch(`/api/batch-email?service_type=all&query=${encodeURIComponent(email.trim())}`)
-        )
+        requests.push(fetch(`/api/batch-email?service_type=all&query=${encodeURIComponent(email.trim())}`))
       }
 
       const responses = await Promise.all(requests)
@@ -194,14 +193,14 @@ export default function ScanForm({ onResults }) {
           <form onSubmit={handleScan} className="flex flex-col sm:flex-row gap-3">
             <input
               type="text"
-              placeholder="Full name *"
+              placeholder="Name or username"
               value={name}
               onChange={e => { setName(e.target.value); setError('') }}
               className={`flex-1 bg-white/80 backdrop-blur-sm border rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 transition-all duration-200 ${error ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-stone-300 focus:border-stone-500 focus:ring-stone-200'}`}
             />
             <input
               type="text"
-              placeholder="Email (optional)"
+              placeholder="Email"
               value={email}
               onChange={e => setEmail(e.target.value)}
               className="flex-1 bg-white/80 backdrop-blur-sm border border-stone-300 rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 transition-all duration-200"
