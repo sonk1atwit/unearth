@@ -17,6 +17,38 @@ const OPT_OUT_INFO = {
   'PeopleFinder':     { url: 'https://www.peoplefinders.com/manage', steps: 'Search for your record and follow the steps to request removal.' },
 }
 
+function toCsvValue(value) {
+  const str = String(value ?? '')
+  if (/[",\n]/.test(str)) {
+    return `"${str.replace(/"/g, '""')}"`
+  }
+  return str
+}
+
+function exportResultsToCsv(results) {
+  const headers = ['Source', 'Type', 'Status', 'Detail']
+  const rows = results.map(r => [
+    r.source,
+    r.type,
+    r.status === 'found' ? 'Exposed' : 'Clear',
+    r.detail,
+  ])
+  const csv = [headers, ...rows]
+    .map(row => row.map(toCsvValue).join(','))
+    .join('\n')
+
+  const blob = new Blob([`﻿${csv}`], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const link = document.createElement('a')
+  const date = new Date().toISOString().slice(0, 10)
+  link.href = url
+  link.download = `unearth-report-${date}.csv`
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
+  URL.revokeObjectURL(url)
+}
+
 function useCountUp(target) {
   const [val, setVal] = useState(0)
   useEffect(() => {
@@ -249,14 +281,23 @@ export default function Dashboard({ results, onNewScan }) {
             {notFound.length} source{notFound.length !== 1 ? 's' : ''} returned no results.
           </p>
         </div>
-        {onNewScan && (
+        <div className="flex items-center gap-2 self-start sm:self-auto">
           <button
-            onClick={onNewScan}
-            className="self-start sm:self-auto text-xs font-medium px-4 py-2 rounded-lg border border-stone-300 text-stone-500 hover:bg-stone-50 transition-colors"
+            onClick={() => exportResultsToCsv(results)}
+            disabled={results.length === 0}
+            className="text-xs font-medium px-4 py-2 rounded-lg border border-stone-300 text-stone-500 hover:bg-stone-50 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            New Scan
+            Export CSV
           </button>
-        )}
+          {onNewScan && (
+            <button
+              onClick={onNewScan}
+              className="text-xs font-medium px-4 py-2 rounded-lg border border-stone-300 text-stone-500 hover:bg-stone-50 transition-colors"
+            >
+              New Scan
+            </button>
+          )}
+        </div>
       </div>
 
       <div className="grid grid-cols-3 gap-4 mb-6">
