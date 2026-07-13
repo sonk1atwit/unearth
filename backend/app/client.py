@@ -67,21 +67,32 @@ class UnearthClient:
 
         data: List[Dict[str, Any]] = []
 
+        counter = 0
+
         for result in results:
             resultdict = result.to_dict()
+            data.append(resultdict)
             if (use_email == True):
                 if resultdict.get("status") == "Registered":
-                    data.append(resultdict)
+                    counter += 1
             else:
                 if resultdict.get("status") == "Found":
-                    data.append(resultdict)
+                    counter += 1
 
         totals = {"Total sites searched": len(results),
-                  "Total Hits": len(data)}
+                  "Total Hits": counter}
         
         data.insert(0, totals)
 
         return data
+    
+
+
+    """
+    
+    CUSTOM MANUAL IMPLEMENTATIONS - NOT FOR LIVE DEPLOYMENT OR USAGE
+    
+    """
     
     async def external_call_get_user(self, request: Request,
         url: str,
