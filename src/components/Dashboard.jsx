@@ -26,11 +26,12 @@ function toCsvValue(value) {
 }
 
 function exportResultsToCsv(results) {
-  const headers = ['Source', 'Type', 'Status', 'Detail']
+  const headers = ['Source', 'Type', 'Status', 'URL', 'Detail']
   const rows = results.map(r => [
     r.source,
     r.type,
     r.status === 'found' ? 'Exposed' : 'Clear',
+    r.url || '',
     r.detail,
   ])
   const csv = [headers, ...rows]
@@ -380,10 +381,23 @@ function ResultCard({ result, onRemove }) {
     >
       <div className="flex-1">
         <div className="flex items-center gap-2 mb-1">
-          <span className="font-semibold text-sm text-stone-800">{result.source}</span>
+          {found && result.url ? (
+            <a
+              href={result.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-semibold text-sm text-stone-800 hover:underline inline-flex items-center gap-1 transition-colors"
+              style={{ color: '#b85c38' }}
+            >
+              {result.source}
+              <span aria-hidden="true" className="text-[10px] opacity-70">↗</span>
+            </a>
+          ) : (
+            <span className="font-semibold text-sm text-stone-800">{result.source}</span>
+          )}
           <span className="text-xs text-stone-500 bg-stone-100 px-2 py-0.5 rounded-full">{result.type}</span>
         </div>
-        <p className="text-xs text-stone-500">{result.detail}</p>
+        <p className="text-xs text-stone-500 break-all">{result.detail}</p>
       </div>
       <div className="flex items-center gap-2">
         <span className={`text-xs font-medium px-2 py-1 rounded-full ${found ? 'bg-orange-100 text-orange-700 animate-pulse-glow' : 'bg-green-100 text-green-700'}`}>

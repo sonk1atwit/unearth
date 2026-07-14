@@ -157,7 +157,8 @@ export default function ScanForm({ onResults }) {
             source: item.site_name,
             type: item.category || 'Other',
             status: (item.status === 'Found' || item.status === 'Registered') ? 'found' : 'not_found',
-            detail: item.url || item.reason || 'Listed in public records.',
+            url: item.url || null,
+            detail: item.reason || (item.url ? 'Listed in public records.' : 'No additional details.'),
           })
         }
       }
