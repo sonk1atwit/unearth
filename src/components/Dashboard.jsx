@@ -149,8 +149,8 @@ function DonutChart({ found, total }) {
 
   const radius = 58
   const circumference = 2 * Math.PI * radius
-  const foundLen = animated ? circumference * (found / total) : 0
-  const clearLen = animated ? circumference * ((total - found) / total) : 0
+  const foundLen = animated && total > 0 ? circumference * (found / total) : 0
+  const clearLen = animated && total > 0 ? circumference * ((total - found) / total) : 0
 
   return (
     <div className="flex flex-col items-center gap-2">
@@ -325,9 +325,13 @@ export default function Dashboard({ results, onNewScan }) {
     })
   }
 
-  const filtered = results
+  // Results narrowed to the selected categories (ignores the status filter) —
+  // used to drive the charts so they reflect what you're focused on.
+  const categoryFiltered = results.filter(r => typeFilters.size === 0 || typeFilters.has(r.type))
+  const chartFound = categoryFiltered.filter(r => r.status === 'found').length
+
+  const filtered = categoryFiltered
     .filter(r => statusFilter === 'All' || (statusFilter === 'Exposed' ? r.status === 'found' : r.status === 'not_found'))
-    .filter(r => typeFilters.size === 0 || typeFilters.has(r.type))
 
   return (
     <div>
@@ -370,8 +374,8 @@ export default function Dashboard({ results, onNewScan }) {
       </div>
 
       <div className="animate-fade-slide-up bg-white/70 backdrop-blur-sm border border-stone-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center gap-6" style={{ animationDelay: '300ms' }}>
-        <DonutChart found={found.length} total={results.length} />
-        <CategoryBreakdown results={results} />
+        <DonutChart found={chartFound} total={categoryFiltered.length} />
+        <CategoryBreakdown results={categoryFiltered} />
       </div>
 
       <div className="animate-fade-slide-up mb-4 flex flex-wrap gap-2" style={{ animationDelay: '360ms' }}>
