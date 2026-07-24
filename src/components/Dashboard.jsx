@@ -400,9 +400,22 @@ function ResultCard({ result, onRemove }) {
         <p className="text-xs text-stone-500 break-all">{result.detail}</p>
       </div>
       <div className="flex items-center gap-2">
-        <span className={`text-xs font-medium px-2 py-1 rounded-full ${found ? 'bg-orange-100 text-orange-700 animate-pulse-glow' : 'bg-green-100 text-green-700'}`}>
-          {found ? 'Exposed' : 'Clear'}
-        </span>
+        {found && OPT_OUT_INFO[result.source]?.url ? (
+          <a
+            href={OPT_OUT_INFO[result.source].url}
+            target="_blank"
+            rel="noopener noreferrer"
+            title={`Go to ${result.source}'s opt-out page`}
+            className="text-xs font-medium px-2 py-1 rounded-full bg-orange-100 text-orange-700 animate-pulse-glow hover:bg-orange-200 inline-flex items-center gap-1 transition-colors"
+          >
+            Exposed
+            <span aria-hidden="true" className="text-[10px] opacity-70">↗</span>
+          </a>
+        ) : (
+          <span className={`text-xs font-medium px-2 py-1 rounded-full ${found ? 'bg-orange-100 text-orange-700 animate-pulse-glow' : 'bg-green-100 text-green-700'}`}>
+            {found ? 'Exposed' : 'Clear'}
+          </span>
+        )}
         {found && (
           <button
             onClick={() => onRemove(result.source)}
