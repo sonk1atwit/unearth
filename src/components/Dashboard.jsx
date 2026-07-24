@@ -311,13 +311,23 @@ export default function Dashboard({ results, onNewScan }) {
   const notFound = results.filter(r => r.status === 'not_found')
   const [removalSource, setRemovalSource] = useState(null)
   const [statusFilter, setStatusFilter] = useState('All')
-  const [typeFilter, setTypeFilter] = useState('All Types')
+  // Multi-select category filter. Empty set means "All Types".
+  const [typeFilters, setTypeFilters] = useState(() => new Set())
 
   const types = [...new Set(results.map(r => r.type))]
 
+  function toggleType(type) {
+    setTypeFilters(prev => {
+      const next = new Set(prev)
+      if (next.has(type)) next.delete(type)
+      else next.add(type)
+      return next
+    })
+  }
+
   const filtered = results
     .filter(r => statusFilter === 'All' || (statusFilter === 'Exposed' ? r.status === 'found' : r.status === 'not_found'))
-    .filter(r => typeFilter === 'All Types' || r.type === typeFilter)
+    .filter(r => typeFilters.size === 0 || typeFilters.has(r.type))
 
   return (
     <div>
@@ -378,12 +388,21 @@ export default function Dashboard({ results, onNewScan }) {
           </button>
         ))}
         <span className="w-px bg-stone-200 mx-1" />
-        {['All Types', ...types].map(f => (
+        <button
+          onClick={() => setTypeFilters(new Set())}
+          className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
+          style={typeFilters.size === 0
+            ? { backgroundColor: '#b85c38', color: 'white' }
+            : { backgroundColor: '#f5f4f2', color: '#78716c' }}
+        >
+          All Types
+        </button>
+        {types.map(f => (
           <button
             key={f}
-            onClick={() => setTypeFilter(f)}
+            onClick={() => toggleType(f)}
             className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
-            style={typeFilter === f
+            style={typeFilters.has(f)
               ? { backgroundColor: '#b85c38', color: 'white' }
               : { backgroundColor: '#f5f4f2', color: '#78716c' }}
           >
