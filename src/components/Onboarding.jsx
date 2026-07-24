@@ -52,11 +52,11 @@ export default function Onboarding({ onStart }) {
         <div className="space-y-6 mb-10">
           <Reveal delay={0}>
             <Section step="1" title="You enter your name and email"
-              body="That's all we need. We use this to search publicly available records across people-search sites, data brokers, and social platforms." />
+              body="That's all we need. We use it to check hundreds of online services for accounts and profiles registered under your username or email." />
           </Reveal>
           <Reveal delay={80}>
             <Section step="2" title="We scan public data sources"
-              body="Unearth checks services like Spokeo, WhitePages, BeenVerified, Intelius, and others — the same sites that sell your information without you ever signing up." />
+              body="Unearth checks hundreds of online services across categories like social media, entertainment, gaming, and shopping to find where your username or email is registered." />
           </Reveal>
           <Reveal delay={160}>
             <Section step="3" title="You see your digital footprint"
