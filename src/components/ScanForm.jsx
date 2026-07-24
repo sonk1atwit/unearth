@@ -1,12 +1,18 @@
 import { useState, useEffect } from 'react'
 
 // Categories the user can scope a scan to. `value` is sent to the backend as
-// `service_type`; 'all' runs every category. If a value returns no results,
-// it likely doesn't match a key the scanner engine expects — adjust it here.
+// `service_type` (lowercased category name); 'all' runs every category. If a
+// category returns no results, its key likely doesn't match what the scanner
+// engine expects — adjust the value here.
+const CATEGORY_NAMES = [
+  'Entertainment', 'Community', 'Social', 'Fitness', 'Adult', 'Learning',
+  'Music', 'Dev', 'Jobs', 'Other', 'Gaming', 'News', 'Travel', 'Sports',
+  'Shopping', 'Hosting', 'Crm', 'Creator',
+]
+
 const CATEGORIES = [
-  { value: 'all',           label: 'All categories' },
-  { value: 'social_media',  label: 'Social Media' },
-  { value: 'entertainment', label: 'Entertainment' },
+  { value: 'all', label: 'All' },
+  ...CATEGORY_NAMES.map(name => ({ value: name.toLowerCase(), label: name })),
 ]
 
 const MOCK_RESULTS = [
@@ -218,20 +224,6 @@ export default function ScanForm({ onResults }) {
                 onChange={e => setEmail(e.target.value)}
                 className="flex-1 bg-white/80 backdrop-blur-sm border border-stone-300 rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 transition-all duration-200"
               />
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <label className="flex items-center gap-2 flex-1">
-                <span className="text-xs text-stone-500 whitespace-nowrap">Search in</span>
-                <select
-                  value={category}
-                  onChange={e => setCategory(e.target.value)}
-                  className="flex-1 bg-white/80 backdrop-blur-sm border border-stone-300 rounded-lg px-3 py-2 text-sm text-stone-800 focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 transition-all duration-200"
-                >
-                  {CATEGORIES.map(c => (
-                    <option key={c.value} value={c.value}>{c.label}</option>
-                  ))}
-                </select>
-              </label>
               <button
                 type="submit"
                 className="text-white font-semibold px-6 py-2 rounded-lg text-sm shadow-sm hover:opacity-90 transition-opacity"
@@ -239,6 +231,24 @@ export default function ScanForm({ onResults }) {
               >
                 Scan
               </button>
+            </div>
+            <div>
+              <p className="text-xs text-stone-500 mb-2">Search in</p>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map(c => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setCategory(c.value)}
+                    className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
+                    style={category === c.value
+                      ? { backgroundColor: '#5a6e2c', color: 'white' }
+                      : { backgroundColor: '#f5f4f2', color: '#78716c' }}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </form>
         )}
