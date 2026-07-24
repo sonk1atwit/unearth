@@ -45,7 +45,7 @@ export default function Onboarding({ onStart }) {
           </h1>
           <p className="text-stone-500 text-base mb-10 leading-relaxed">
             Unearth is a free, open-source tool that shows you exactly which websites and data
-            brokers have your personal information — and helps you take steps to remove it.
+            brokers have your personal information, and helps you take steps to remove it.
           </p>
         </Reveal>
 
@@ -74,7 +74,7 @@ export default function Onboarding({ onStart }) {
               Transparency Notice
             </p>
             <ul className="text-sm text-stone-600 space-y-1.5 list-disc list-inside">
-              <li>Your name and email are only used to perform the scan — they are never stored or shared.</li>
+              <li>Your name and email are only used to perform the scan. They are never stored or shared.</li>
               <li>All queries go through our backend server so your searches stay private from third parties.</li>
               <li>This tool only reads publicly available information. We do not access private accounts.</li>
               <li>Unearth is open-source. You can inspect the full codebase on GitHub.</li>

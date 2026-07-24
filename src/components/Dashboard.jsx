@@ -63,7 +63,7 @@ function resolveRemovalLink(source, listingUrl) {
     try {
       return { url: new URL(listingUrl).origin, kind: 'site' }
     } catch {
-      // listingUrl wasn't a valid absolute URL — fall through
+      // listingUrl wasn't a valid absolute URL, fall through
     }
   }
   return { url: null, kind: 'none' }
@@ -135,7 +135,7 @@ function ScanBanner() {
       style={{ backgroundColor: 'rgba(90,110,44,0.08)', borderColor: 'rgba(90,110,44,0.25)', color: '#5a6e2c' }}
     >
       <span>✓</span>
-      <span>Scan complete — your digital footprint has been mapped.</span>
+      <span>Scan complete. Your digital footprint has been mapped.</span>
     </div>
   )
 }
@@ -325,7 +325,7 @@ export default function Dashboard({ results, onNewScan }) {
     })
   }
 
-  // Results narrowed to the selected categories (ignores the status filter) —
+  // Results narrowed to the selected categories (ignores the status filter),
   // used to drive the charts so they reflect what you're focused on.
   const categoryFiltered = results.filter(r => typeFilters.size === 0 || typeFilters.has(r.type))
   const chartFound = categoryFiltered.filter(r => r.status === 'found').length

@@ -8,7 +8,7 @@ function Footer() {
   return (
     <footer className="border-t border-stone-200/60 bg-white/40 backdrop-blur-sm px-4 py-4 text-center">
       <p className="text-xs text-stone-400">
-        Unearth is open-source —{' '}
+        Unearth is open-source.{' '}
         <a
           href="https://github.com/sonk1atwit/unearth"
           target="_blank"
