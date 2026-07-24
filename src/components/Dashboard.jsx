@@ -367,18 +367,7 @@ export default function Dashboard({ results, onNewScan }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <StatCard label="Sources Scanned" value={results.length} delay={100} />
-        <StatCard label="Exposures Found" value={found.length} delay={180} valueStyle={{ color: '#b85c38' }} />
-        <StatCard label="Clear" value={notFound.length} delay={260} valueStyle={{ color: '#5a6e2c' }} />
-      </div>
-
-      <div className="animate-fade-slide-up bg-white/70 backdrop-blur-sm border border-stone-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center gap-6" style={{ animationDelay: '300ms' }}>
-        <DonutChart found={chartFound} total={categoryFiltered.length} />
-        <CategoryBreakdown results={categoryFiltered} />
-      </div>
-
-      <div className="animate-fade-slide-up mb-4 flex flex-wrap gap-2" style={{ animationDelay: '360ms' }}>
+      <div className="animate-fade-slide-up mb-6 flex flex-wrap gap-2" style={{ animationDelay: '80ms' }}>
         {['All', 'Exposed', 'Clear'].map(f => (
           <button
             key={f}
@@ -413,6 +402,17 @@ export default function Dashboard({ results, onNewScan }) {
             {f}
           </button>
         ))}
+      </div>
+
+      <div className="grid grid-cols-3 gap-4 mb-6">
+        <StatCard label="Sources Scanned" value={results.length} delay={100} />
+        <StatCard label="Exposures Found" value={found.length} delay={180} valueStyle={{ color: '#b85c38' }} />
+        <StatCard label="Clear" value={notFound.length} delay={260} valueStyle={{ color: '#5a6e2c' }} />
+      </div>
+
+      <div className="animate-fade-slide-up bg-white/70 backdrop-blur-sm border border-stone-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center gap-6" style={{ animationDelay: '300ms' }}>
+        <DonutChart found={chartFound} total={categoryFiltered.length} />
+        <CategoryBreakdown results={categoryFiltered} />
       </div>
 
       <div className="flex flex-col gap-3">
