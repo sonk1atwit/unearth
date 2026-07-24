@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react'
 
+// Categories the user can focus a scan on. The scan always runs every
+// category; this selection just sets which filter the dashboard opens on.
+const CATEGORY_NAMES = [
+  'Entertainment', 'Community', 'Social', 'Fitness', 'Adult', 'Learning',
+  'Music', 'Dev', 'Jobs', 'Other', 'Gaming', 'News', 'Travel', 'Sports',
+  'Shopping', 'Hosting', 'Crm', 'Creator',
+]
+
+const CATEGORIES = [
+  { value: 'all', label: 'All' },
+  ...CATEGORY_NAMES.map(name => ({ value: name, label: name })),
+]
+
 const MOCK_RESULTS = [
   { source: 'Spokeo',           type: 'People Search',    status: 'found',     detail: 'Name, address, phone number listed publicly.' },
   { source: 'WhitePages',       type: 'People Search',    status: 'found',     detail: 'Full name and city visible in directory.' },
@@ -114,6 +127,7 @@ function ScanError({ onRetry }) {
 export default function ScanForm({ onResults }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
+  const [category, setCategory] = useState('all')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [scanFailed, setScanFailed] = useState(false)
@@ -163,8 +177,10 @@ export default function ScanForm({ onResults }) {
         }
       }
 
+      const initialType = category === 'all' ? 'All Types' : category
+
       setLoading(false)
-      onResults(combined)
+      onResults(combined, initialType)
     } catch {
       setLoading(false)
       setScanFailed(true)
@@ -191,28 +207,48 @@ export default function ScanForm({ onResults }) {
         ) : loading ? (
           <DiggingLoader />
         ) : (
-          <form onSubmit={handleScan} className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="text"
-              placeholder="Name or username"
-              value={name}
-              onChange={e => { setName(e.target.value); setError('') }}
-              className={`flex-1 bg-white/80 backdrop-blur-sm border rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 transition-all duration-200 ${error ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-stone-300 focus:border-stone-500 focus:ring-stone-200'}`}
-            />
-            <input
-              type="text"
-              placeholder="Email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="flex-1 bg-white/80 backdrop-blur-sm border border-stone-300 rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 transition-all duration-200"
-            />
-            <button
-              type="submit"
-              className="text-white font-semibold px-6 py-2 rounded-lg text-sm shadow-sm hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: '#5a6e2c' }}
-            >
-              Scan
-            </button>
+          <form onSubmit={handleScan} className="flex flex-col gap-4">
+            <div className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="text"
+                placeholder="Name or username"
+                value={name}
+                onChange={e => { setName(e.target.value); setError('') }}
+                className={`flex-1 bg-white/80 backdrop-blur-sm border rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:ring-2 transition-all duration-200 ${error ? 'border-red-400 focus:border-red-400 focus:ring-red-100' : 'border-stone-300 focus:border-stone-500 focus:ring-stone-200'}`}
+              />
+              <input
+                type="text"
+                placeholder="Email"
+                value={email}
+                onChange={e => setEmail(e.target.value)}
+                className="flex-1 bg-white/80 backdrop-blur-sm border border-stone-300 rounded-lg px-4 py-2 text-sm text-stone-800 placeholder-stone-400 focus:outline-none focus:border-stone-500 focus:ring-2 focus:ring-stone-200 transition-all duration-200"
+              />
+              <button
+                type="submit"
+                className="text-white font-semibold px-6 py-2 rounded-lg text-sm shadow-sm hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#5a6e2c' }}
+              >
+                Scan
+              </button>
+            </div>
+            <div>
+              <p className="text-xs text-stone-500 mb-2">Focus on a category (optional). The scan always covers everything.</p>
+              <div className="flex flex-wrap gap-2">
+                {CATEGORIES.map(c => (
+                  <button
+                    key={c.value}
+                    type="button"
+                    onClick={() => setCategory(c.value)}
+                    className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
+                    style={category === c.value
+                      ? { backgroundColor: '#5a6e2c', color: 'white' }
+                      : { backgroundColor: '#f5f4f2', color: '#78716c' }}
+                  >
+                    {c.label}
+                  </button>
+                ))}
+              </div>
+            </div>
           </form>
         )}
         {error && <p className="mt-2 text-xs text-red-500">{error}</p>}

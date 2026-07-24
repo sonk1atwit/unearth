@@ -25,10 +25,16 @@ function Footer() {
 export default function App() {
   const [started, setStarted] = useState(false)
   const [scanResults, setScanResults] = useState(null)
+  const [initialType, setInitialType] = useState('All Types')
 
   function goHome() {
     setStarted(false)
     setScanResults(null)
+  }
+
+  function handleResults(results, type = 'All Types') {
+    setScanResults(results)
+    setInitialType(type)
   }
 
   if (!started) {
@@ -48,8 +54,9 @@ export default function App() {
       <Navbar onHome={goHome} />
       <div className="dot-grid flex-1">
         <main className="max-w-4xl mx-auto px-4 py-10">
-          <ScanForm onResults={setScanResults} />
-          {scanResults && <Dashboard results={scanResults} onNewScan={() => setScanResults(null)} />}
+          {scanResults
+            ? <Dashboard results={scanResults} initialType={initialType} onNewScan={() => setScanResults(null)} />
+            : <ScanForm onResults={handleResults} />}
         </main>
       </div>
       <Footer />

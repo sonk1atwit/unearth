@@ -306,15 +306,18 @@ Thank you,
   )
 }
 
-export default function Dashboard({ results, onNewScan }) {
+export default function Dashboard({ results, onNewScan, initialType = 'All Types' }) {
   const found = results.filter(r => r.status === 'found')
   const notFound = results.filter(r => r.status === 'not_found')
+  const types = [...new Set(results.map(r => r.type))]
+
   const [removalSource, setRemovalSource] = useState(null)
   const [statusFilter, setStatusFilter] = useState('All')
-  // Multi-select category filter. Empty set means "All Types".
-  const [typeFilters, setTypeFilters] = useState(() => new Set())
-
-  const types = [...new Set(results.map(r => r.type))]
+  // Multi-select category filter. Empty set means "All Types". Seeded with the
+  // category chosen before the scan, if it has any results.
+  const [typeFilters, setTypeFilters] = useState(
+    () => (initialType !== 'All Types' && types.includes(initialType)) ? new Set([initialType]) : new Set()
+  )
 
   function toggleType(type) {
     setTypeFilters(prev => {
