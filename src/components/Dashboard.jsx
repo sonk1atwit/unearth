@@ -17,6 +17,58 @@ const OPT_OUT_INFO = {
   'PeopleFinder':     { url: 'https://www.peoplefinders.com/manage', steps: 'Search for your record and follow the steps to request removal.' },
 }
 
+// Direct account-deletion / settings pages for common account-based services.
+// Keys are matched case-insensitively against the source name.
+const DELETE_URLS = {
+  'apple':       'https://support.apple.com/en-us/HT208109',
+  'appletv':     'https://support.apple.com/en-us/HT208109',
+  'icloud':      'https://support.apple.com/en-us/HT208109',
+  'google':      'https://myaccount.google.com/deleteaccount',
+  'youtube':     'https://myaccount.google.com/deleteaccount',
+  'gmail':       'https://myaccount.google.com/deleteaccount',
+  'facebook':    'https://www.facebook.com/help/delete_account',
+  'instagram':   'https://www.instagram.com/accounts/remove/request/permanent/',
+  'twitter':     'https://twitter.com/settings/deactivate',
+  'x':           'https://twitter.com/settings/deactivate',
+  'twitter/x':   'https://twitter.com/settings/deactivate',
+  'reddit':      'https://www.reddit.com/settings/data-request',
+  'linkedin':    'https://www.linkedin.com/psettings/account-management/close-submit',
+  'snapchat':    'https://accounts.snapchat.com/accounts/delete_account',
+  'tiktok':      'https://support.tiktok.com/en/account-and-privacy/deleting-an-account',
+  'pinterest':   'https://www.pinterest.com/settings/account-settings/',
+  'spotify':     'https://support.spotify.com/us/article/close-account/',
+  'netflix':     'https://www.netflix.com/cancelplan',
+  'amazon':      'https://www.amazon.com/privacy/data-deletion',
+  'discord':     'https://support.discord.com/hc/en-us/articles/212500837',
+  'steam':       'https://help.steampowered.com/en/wizard/HelpWithDataRelatedIssues',
+  'twitch':      'https://www.twitch.tv/user/delete-account',
+  'ebay':        'https://www.ebay.com/help/account/changing-account-settings/closing-account',
+  'paypal':      'https://www.paypal.com/myaccount/settings/',
+  'microsoft':   'https://account.live.com/closeaccount.aspx',
+  'github':      'https://github.com/settings/admin',
+  'dropbox':     'https://www.dropbox.com/account/delete',
+  'yahoo':       'https://login.yahoo.com/account/delete-user',
+}
+
+// Resolve the best "remove my account" link for a source.
+// Priority: known opt-out page > curated delete page > the site's own domain.
+function resolveRemovalLink(source, listingUrl) {
+  const optOutUrl = OPT_OUT_INFO[source]?.url
+  if (optOutUrl) return { url: optOutUrl, kind: 'optout' }
+
+  const deleteUrl = DELETE_URLS[source?.toLowerCase().trim()]
+  if (deleteUrl) return { url: deleteUrl, kind: 'delete' }
+
+  if (listingUrl) {
+    try {
+      return { url: new URL(listingUrl).origin, kind: 'site' }
+    } catch {
+      // listingUrl wasn't a valid absolute URL — fall through
+    }
+  }
+  return { url: null, kind: 'none' }
+}
+
 function toCsvValue(value) {
   const str = String(value ?? '')
   if (/[",\n]/.test(str)) {
@@ -374,9 +426,13 @@ function StatCard({ label, value, delay, valueStyle }) {
 
 function ResultCard({ result, onRemove }) {
   const found = result.status === 'found'
-  const optOutUrl = OPT_OUT_INFO[result.source]?.url
-  const exposedLink = optOutUrl
-    || `https://www.google.com/search?q=${encodeURIComponent(`how to delete account on ${result.source}`)}`
+  const removal = resolveRemovalLink(result.source, result.url)
+  const removalTitle = {
+    optout: `Go to ${result.source}'s opt-out page`,
+    delete: `Delete your account on ${result.source}`,
+    site: `Go to ${result.source} to manage or delete your account`,
+    none: 'Exposed',
+  }[removal.kind]
   return (
     <div
       className="bg-white/70 backdrop-blur-sm rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border border-stone-200 border-l-4"
@@ -403,20 +459,20 @@ function ResultCard({ result, onRemove }) {
         <p className="text-xs text-stone-500 break-all">{result.detail}</p>
       </div>
       <div className="flex items-center gap-2">
-        {found ? (
+        {found && removal.url ? (
           <a
-            href={exposedLink}
+            href={removal.url}
             target="_blank"
             rel="noopener noreferrer"
-            title={optOutUrl ? `Go to ${result.source}'s opt-out page` : `How to delete your account on ${result.source}`}
+            title={removalTitle}
             className="text-xs font-medium px-2 py-1 rounded-full bg-orange-100 text-orange-700 animate-pulse-glow hover:bg-orange-200 inline-flex items-center gap-1 transition-colors"
           >
             Exposed
             <span aria-hidden="true" className="text-[10px] opacity-70">↗</span>
           </a>
         ) : (
-          <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">
-            Clear
+          <span className={`text-xs font-medium px-2 py-1 rounded-full ${found ? 'bg-orange-100 text-orange-700 animate-pulse-glow' : 'bg-green-100 text-green-700'}`}>
+            {found ? 'Exposed' : 'Clear'}
           </span>
         )}
         {found && (
