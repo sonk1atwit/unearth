@@ -374,7 +374,9 @@ function StatCard({ label, value, delay, valueStyle }) {
 
 function ResultCard({ result, onRemove }) {
   const found = result.status === 'found'
-  const exposedLink = OPT_OUT_INFO[result.source]?.url || result.url
+  const optOutUrl = OPT_OUT_INFO[result.source]?.url
+  const exposedLink = optOutUrl
+    || `https://www.google.com/search?q=${encodeURIComponent(`how to delete account on ${result.source}`)}`
   return (
     <div
       className="bg-white/70 backdrop-blur-sm rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border border-stone-200 border-l-4"
@@ -401,20 +403,20 @@ function ResultCard({ result, onRemove }) {
         <p className="text-xs text-stone-500 break-all">{result.detail}</p>
       </div>
       <div className="flex items-center gap-2">
-        {found && exposedLink ? (
+        {found ? (
           <a
             href={exposedLink}
             target="_blank"
             rel="noopener noreferrer"
-            title={OPT_OUT_INFO[result.source]?.url ? `Go to ${result.source}'s opt-out page` : `View your listing on ${result.source}`}
+            title={optOutUrl ? `Go to ${result.source}'s opt-out page` : `How to delete your account on ${result.source}`}
             className="text-xs font-medium px-2 py-1 rounded-full bg-orange-100 text-orange-700 animate-pulse-glow hover:bg-orange-200 inline-flex items-center gap-1 transition-colors"
           >
             Exposed
             <span aria-hidden="true" className="text-[10px] opacity-70">↗</span>
           </a>
         ) : (
-          <span className={`text-xs font-medium px-2 py-1 rounded-full ${found ? 'bg-orange-100 text-orange-700 animate-pulse-glow' : 'bg-green-100 text-green-700'}`}>
-            {found ? 'Exposed' : 'Clear'}
+          <span className="text-xs font-medium px-2 py-1 rounded-full bg-green-100 text-green-700">
+            Clear
           </span>
         )}
         {found && (
