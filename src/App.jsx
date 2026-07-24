@@ -25,16 +25,16 @@ function Footer() {
 export default function App() {
   const [started, setStarted] = useState(false)
   const [scanResults, setScanResults] = useState(null)
-  const [initialType, setInitialType] = useState('All Types')
+  const [initialTypes, setInitialTypes] = useState([])
 
   function goHome() {
     setStarted(false)
     setScanResults(null)
   }
 
-  function handleResults(results, type = 'All Types') {
+  function handleResults(results, types = []) {
     setScanResults(results)
-    setInitialType(type)
+    setInitialTypes(types)
   }
 
   if (!started) {
@@ -55,7 +55,7 @@ export default function App() {
       <div className="dot-grid flex-1">
         <main className="max-w-4xl mx-auto px-4 py-10">
           {scanResults
-            ? <Dashboard results={scanResults} initialType={initialType} onNewScan={() => setScanResults(null)} />
+            ? <Dashboard results={scanResults} initialTypes={initialTypes} onNewScan={() => setScanResults(null)} />
             : <ScanForm onResults={handleResults} />}
         </main>
       </div>

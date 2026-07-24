@@ -1,16 +1,11 @@
 import { useState, useEffect } from 'react'
 
 // Categories the user can focus a scan on. The scan always runs every
-// category; this selection just sets which filter the dashboard opens on.
+// category; this selection just sets which filters the dashboard opens on.
 const CATEGORY_NAMES = [
   'Entertainment', 'Community', 'Social', 'Fitness', 'Adult', 'Learning',
   'Music', 'Dev', 'Jobs', 'Other', 'Gaming', 'News', 'Travel', 'Sports',
   'Shopping', 'Hosting', 'Crm', 'Creator',
-]
-
-const CATEGORIES = [
-  { value: 'all', label: 'All' },
-  ...CATEGORY_NAMES.map(name => ({ value: name, label: name })),
 ]
 
 const MOCK_RESULTS = [
@@ -127,10 +122,20 @@ function ScanError({ onRetry }) {
 export default function ScanForm({ onResults }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
-  const [category, setCategory] = useState('all')
+  // Multi-select category focus. Empty set means "All".
+  const [categories, setCategories] = useState(() => new Set())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [scanFailed, setScanFailed] = useState(false)
+
+  function toggleCategory(name) {
+    setCategories(prev => {
+      const next = new Set(prev)
+      if (next.has(name)) next.delete(name)
+      else next.add(name)
+      return next
+    })
+  }
 
   async function handleScan(e) {
     e.preventDefault()
@@ -177,10 +182,8 @@ export default function ScanForm({ onResults }) {
         }
       }
 
-      const initialType = category === 'all' ? 'All Types' : category
-
       setLoading(false)
-      onResults(combined, initialType)
+      onResults(combined, [...categories])
     } catch {
       setLoading(false)
       setScanFailed(true)
@@ -232,19 +235,29 @@ export default function ScanForm({ onResults }) {
               </button>
             </div>
             <div>
-              <p className="text-xs text-stone-500 mb-2">Focus on a category (optional). The scan always covers everything.</p>
+              <p className="text-xs text-stone-500 mb-2">Focus on categories (optional). The scan always covers everything.</p>
               <div className="flex flex-wrap gap-2">
-                {CATEGORIES.map(c => (
+                <button
+                  type="button"
+                  onClick={() => setCategories(new Set())}
+                  className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
+                  style={categories.size === 0
+                    ? { backgroundColor: '#5a6e2c', color: 'white' }
+                    : { backgroundColor: '#f5f4f2', color: '#78716c' }}
+                >
+                  All
+                </button>
+                {CATEGORY_NAMES.map(name => (
                   <button
-                    key={c.value}
+                    key={name}
                     type="button"
-                    onClick={() => setCategory(c.value)}
+                    onClick={() => toggleCategory(name)}
                     className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
-                    style={category === c.value
+                    style={categories.has(name)
                       ? { backgroundColor: '#5a6e2c', color: 'white' }
                       : { backgroundColor: '#f5f4f2', color: '#78716c' }}
                   >
-                    {c.label}
+                    {name}
                   </button>
                 ))}
               </div>
