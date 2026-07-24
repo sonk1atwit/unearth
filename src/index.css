@@ -58,20 +58,21 @@
 .dot-grid {
   background-image:
     repeating-radial-gradient(
-      ellipse 130% 70% at 25% 55%,
+      ellipse 1300px 630px at 25% 55%,
       transparent 0px, transparent 36px,
       rgba(90, 110, 44, 0.09) 38px, transparent 39px
     ),
     repeating-radial-gradient(
-      ellipse 75% 130% at 75% 25%,
+      ellipse 750px 1170px at 75% 25%,
       transparent 0px, transparent 50px,
       rgba(139, 90, 43, 0.07) 52px, transparent 53px
     ),
     repeating-radial-gradient(
-      ellipse 90% 55% at 55% 85%,
+      ellipse 900px 495px at 55% 85%,
       transparent 0px, transparent 26px,
       rgba(90, 110, 44, 0.06) 28px, transparent 29px
     );
+  background-attachment: fixed;
 }
 
 .btn-shimmer {
