@@ -374,6 +374,7 @@ function StatCard({ label, value, delay, valueStyle }) {
 
 function ResultCard({ result, onRemove }) {
   const found = result.status === 'found'
+  const exposedLink = OPT_OUT_INFO[result.source]?.url || result.url
   return (
     <div
       className="bg-white/70 backdrop-blur-sm rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 border border-stone-200 border-l-4"
@@ -400,12 +401,12 @@ function ResultCard({ result, onRemove }) {
         <p className="text-xs text-stone-500 break-all">{result.detail}</p>
       </div>
       <div className="flex items-center gap-2">
-        {found && OPT_OUT_INFO[result.source]?.url ? (
+        {found && exposedLink ? (
           <a
-            href={OPT_OUT_INFO[result.source].url}
+            href={exposedLink}
             target="_blank"
             rel="noopener noreferrer"
-            title={`Go to ${result.source}'s opt-out page`}
+            title={OPT_OUT_INFO[result.source]?.url ? `Go to ${result.source}'s opt-out page` : `View your listing on ${result.source}`}
             className="text-xs font-medium px-2 py-1 rounded-full bg-orange-100 text-orange-700 animate-pulse-glow hover:bg-orange-200 inline-flex items-center gap-1 transition-colors"
           >
             Exposed
