@@ -368,19 +368,6 @@ export default function Dashboard({ results, onNewScan }) {
       </div>
 
       <div className="animate-fade-slide-up mb-6 flex flex-wrap gap-2" style={{ animationDelay: '80ms' }}>
-        {['All', 'Exposed', 'Clear'].map(f => (
-          <button
-            key={f}
-            onClick={() => setStatusFilter(f)}
-            className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
-            style={statusFilter === f
-              ? { backgroundColor: '#5a6e2c', color: 'white' }
-              : { backgroundColor: '#f5f4f2', color: '#78716c' }}
-          >
-            {f}
-          </button>
-        ))}
-        <span className="w-px bg-stone-200 mx-1" />
         <button
           onClick={() => setTypeFilters(new Set())}
           className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
@@ -413,6 +400,21 @@ export default function Dashboard({ results, onNewScan }) {
       <div className="animate-fade-slide-up bg-white/70 backdrop-blur-sm border border-stone-200 rounded-xl p-5 mb-8 flex flex-col sm:flex-row items-center gap-6" style={{ animationDelay: '300ms' }}>
         <DonutChart found={chartFound} total={categoryFiltered.length} />
         <CategoryBreakdown results={categoryFiltered} />
+      </div>
+
+      <div className="mb-4 flex flex-wrap gap-2">
+        {['All', 'Exposed', 'Clear'].map(f => (
+          <button
+            key={f}
+            onClick={() => setStatusFilter(f)}
+            className="text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-150"
+            style={statusFilter === f
+              ? { backgroundColor: '#5a6e2c', color: 'white' }
+              : { backgroundColor: '#f5f4f2', color: '#78716c' }}
+          >
+            {f}
+          </button>
+        ))}
       </div>
 
       <div className="flex flex-col gap-3">
