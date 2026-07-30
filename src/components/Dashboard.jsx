@@ -82,7 +82,7 @@ function exportResultsToCsv(results) {
   const rows = results.map(r => [
     r.source,
     r.type,
-    r.status === 'found' ? 'Exposed' : 'Clear',
+    r.status === 'found' ? 'Found' : 'Clear',
     r.url || '',
     r.detail,
   ])
@@ -172,10 +172,10 @@ function DonutChart({ found, total }) {
           style={{ transition: 'stroke-dasharray 0.9s ease' }}
         />
         <text x="80" y="72" textAnchor="middle" fill="#1c1917" fontSize="30" fontWeight="bold">{found}</text>
-        <text x="80" y="93" textAnchor="middle" fill="#78716c" fontSize="11">of {total} exposed</text>
+        <text x="80" y="93" textAnchor="middle" fill="#78716c" fontSize="11">of {total} found</text>
       </svg>
       <div className="flex gap-3 text-xs text-stone-500">
-        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{backgroundColor:'#fb923c'}} />Exposed</span>
+        <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{backgroundColor:'#fb923c'}} />Found</span>
         <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full inline-block" style={{backgroundColor:'#4ade80'}} />Clear</span>
       </div>
     </div>
@@ -204,7 +204,7 @@ function CategoryBreakdown({ results }) {
           <div key={type}>
             <div className="flex justify-between text-xs mb-1">
               <span className="text-stone-600 font-medium">{type}</span>
-              <span className="text-stone-400">{counts.found}/{counts.total} exposed</span>
+              <span className="text-stone-400">{counts.found}/{counts.total} found</span>
             </div>
             <div className="h-1.5 bg-stone-100 rounded-full overflow-hidden">
               <div
@@ -334,7 +334,7 @@ export default function Dashboard({ results, onNewScan, initialTypes = [] }) {
   const chartFound = categoryFiltered.filter(r => r.status === 'found').length
 
   const filtered = categoryFiltered
-    .filter(r => statusFilter === 'All' || (statusFilter === 'Exposed' ? r.status === 'found' : r.status === 'not_found'))
+    .filter(r => statusFilter === 'All' || (statusFilter === 'Found' ? r.status === 'found' : r.status === 'not_found'))
 
   return (
     <div>
@@ -406,7 +406,7 @@ export default function Dashboard({ results, onNewScan, initialTypes = [] }) {
       </div>
 
       <div className="mb-4 flex flex-wrap gap-2">
-        {['All', 'Exposed', 'Clear'].map(f => (
+        {['All', 'Found', 'Clear'].map(f => (
           <button
             key={f}
             onClick={() => setStatusFilter(f)}
@@ -459,7 +459,7 @@ function ResultCard({ result, onRemove }) {
     optout: `Go to ${result.source}'s opt-out page`,
     delete: `Delete your account on ${result.source}`,
     site: `Go to ${result.source} to manage or delete your account`,
-    none: 'Exposed',
+    none: 'Found',
   }[removal.kind]
   return (
     <div
@@ -495,12 +495,12 @@ function ResultCard({ result, onRemove }) {
             title={removalTitle}
             className="text-xs font-medium px-2 py-1 rounded-full bg-orange-100 text-orange-700 animate-pulse-glow hover:bg-orange-200 inline-flex items-center gap-1 transition-colors"
           >
-            Exposed
+            Found
             <span aria-hidden="true" className="text-[10px] opacity-70">↗</span>
           </a>
         ) : (
           <span className={`text-xs font-medium px-2 py-1 rounded-full ${found ? 'bg-orange-100 text-orange-700 animate-pulse-glow' : 'bg-green-100 text-green-700'}`}>
-            {found ? 'Exposed' : 'Clear'}
+            {found ? 'Found' : 'Clear'}
           </span>
         )}
         {found && (
