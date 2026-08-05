@@ -1,6 +1,6 @@
 <div align="center">
 
-# UNEARTH
+# Unearth
 
 <img src="public/favicon.svg" alt="App Diagram" width="300">
 
