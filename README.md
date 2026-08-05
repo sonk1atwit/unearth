@@ -4,7 +4,11 @@
 
 <img src="public/favicon.svg" alt="App Diagram" width="300">
 
-## Excavate your digital footprint: Unearth is an open-source OSINT visualization tool designed for everyone.
+## Excavate your digital footprint.
+
+### Unearth is an open-source OSINT visualization tool designed for everyone.
+
+---
 
 ### Features
 
@@ -14,9 +18,13 @@
 - Visual graphs and bars to indicate results.
 - CSV export for query results.
 
+---
+
 ### Hosting Architecture
 
 Unearth, at its live link, is entirely stateless - your query results are never stored and only exist for as long as the web page is open. The site is hosted on our own remote hardware.
+
+---
 
 ### How To Use
 
@@ -29,11 +37,15 @@ Unearth, at its live link, is entirely stateless - your query results are never 
 
 Once the page is refreshed or closed, the results will disappear.
 
+---
+
 ### Repo Hierarchy
 
 | **backend/**                                                                   | **backend/app**                                                                                           | **public/**                   | **src/**                                           | **src/components**                                                    |
 |--------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------|-------------------------------|----------------------------------------------------|-----------------------------------------------------------------------|
 | All backend infrastructure files (Docker, requirements.txt) are included here. | All backend code is included here, including the client itself, search functions, secret management, etc. | Images used for the frontend. | Baseline css and component files for the frontend. | Frontend functionality files for scanning, result visualization, etc. |
+
+---
 
 ### Self Hosting
 
@@ -51,5 +63,15 @@ docker run --env-file backend/.env -p 8000:8000 unearth-backend:latest
 ```
 
 Once running, all exposed endpoints from the FastAPI client will be available at the specified port.
+
+---
+
+### Special Thanks
+
+Unearth was developed as part of the COMP 5500 Senior Project course at the Wentworth Institute of Technology from May 2026-August 2026.
+
+### Colin Mastrocola - Server architecture, hosting, and network setup.
+### Kevin Son @sonk1atwit - Frontend design and code.
+### Kyle Shott @kyshott - Backend design and code.
 
 </div>
