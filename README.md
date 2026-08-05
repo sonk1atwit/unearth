@@ -70,8 +70,8 @@ Once running, all exposed endpoints from the FastAPI client will be available at
 
 Unearth was developed as part of the COMP 5500 Senior Project course at the Wentworth Institute of Technology from May 2026-August 2026.
 
-### Colin Mastrocola - Server architecture, hosting, and network setup.
-### Kevin Son @sonk1atwit - Frontend design and code.
-### Kyle Shott @kyshott - Backend design and code.
+### Colin Mastrocola [@mastrocolac](https://github.com/mastrocolac) - Server architecture, hosting, and network setup.
+### Kevin Son [@sonk1atwit](https://github.com/sonk1atwit) - Frontend design and code.
+### Kyle Shott [@kyshott](https://github.com/kyshott) - Backend design and code.
 
 </div>
